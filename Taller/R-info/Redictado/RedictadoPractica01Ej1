@@ -1,7 +1,4 @@
-{Bienvenidos al entorno CMRE.
-Lo siguiente es un código de ejemplo que implementa un
-proceso que recibe un número de avenida como parámetro,
-se posiciona en esa avenida y la recorre.}
+{	CORREGIDO	 }
 
 programa RedictadoPractica01Ej1A
 procesos
