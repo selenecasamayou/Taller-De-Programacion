@@ -1,0 +1,205 @@
+{	CORREGIDO	}
+
+programa RedictadoParcial7
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin  
+  
+  proceso irDeposito(E avDepo: numero; E caDepo: numero; E cantFlores: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    repetir cantFlores
+      BloquearEsquina(avDepo, caDepo)
+      Pos(avDepo, caDepo)
+      depositarFlor
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(avDepo, caDepo)
+  fin
+  
+  proceso avanzar(ES avOriginal: numero; ES caOriginal: numero; E pasos: numero; ES cantFlores: numero; E avDepo: numero; E caDepo: numero)
+  comenzar
+    repetir pasos
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    repetir cantFlores
+      irDeposito(avDepo, caDepo, cantFlores, avOriginal, caOriginal)
+  fin
+  
+  proceso deposito(E calle: numero; E cantTotalFlores: numero)
+  comenzar
+    Pos(1, calle)
+    repetir cantTotalFlores
+      tomarFlor
+  fin
+areas
+  area1: AreaP (56,98,100,98)
+  area2: AreaP (56,99,100,99)  
+  area3: AreaP (56,3,100,3)
+  area4: AreaP (56,4,100,4)
+  posCoord1: AreaP (100,100,100,100)
+  posCoord2: AreaP (100,2,100,2)
+  deposito1: AreaPC (1,99,1,99)
+  deposito2: AreaPC (1,3,1,3)
+robots
+  robot robot1
+  variables
+    pasos: numero
+    avOriginal, caOriginal, avDepo, caDepo: numero
+    cantFlores, cantFloresTotal: numero
+  comenzar
+    izquierda
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avDepo:= 1
+    caDepo:= 99
+    cantFlores:= 0
+    cantFloresTotal:= 0
+    repetir 11
+      avanzar(avOriginal, caOriginal, pasos, cantFlores, avDepo, caDepo)
+      cantFloresTotal:= cantFloresTotal + cantFlores
+      cantFlores:= 0
+      RecibirMensaje(pasos, coordinador1)
+    EnviarMensaje(cantFloresTotal, coordinador1)  {avisa que termino}
+  fin
+  
+  robot robot2
+  variables
+    pasos: numero
+    avOriginal, caOriginal, avDepo, caDepo: numero
+    cantFlores, cantFloresTotal: numero
+  comenzar
+    izquierda
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avDepo:= 1
+    caDepo:= 99
+    cantFlores:= 0
+    cantFloresTotal:= 0
+    repetir 11
+      avanzar(avOriginal, caOriginal, pasos, cantFlores, avDepo, caDepo)
+      cantFloresTotal:= cantFloresTotal + cantFlores
+      cantFlores:= 0
+      RecibirMensaje(pasos, coordinador1)
+    EnviarMensaje(cantFloresTotal, coordinador1)  {avisa que termino}
+  fin
+  
+  robot robot3
+  variables
+    pasos: numero
+    cantFlores, cantTotalFlores: numero
+    termino: numero
+  comenzar
+    repetir 11
+      Random(pasos, 3, 5)
+      EnviarMensaje(pasos, S1)
+      Random(pasos, 3, 5)
+      EnviarMensaje(pasos, S2)
+    cantTotalFlores:= 0
+    repetir 2
+      RecibirMensaje(cantFlores, *)
+      cantTotalFlores:= cantTotalFlores + cantFlores
+    EnviarMensaje(0, coordinador2)
+    RecibirMensaje(termino, coordinador2)
+    deposito(99, cantTotalFlores)
+  fin
+  
+  robot robot4
+  variables
+    pasos: numero
+    avOriginal, caOriginal, avDepo, caDepo: numero
+    cantFlores, cantFloresTotal: numero
+  comenzar
+    izquierda
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avDepo:= 1
+    caDepo:= 3
+    cantFlores:= 0
+    cantFloresTotal:= 0
+    repetir 11
+      avanzar(avOriginal, caOriginal, pasos, cantFlores, avDepo, caDepo)
+      cantFloresTotal:= cantFloresTotal + cantFlores
+      cantFlores:= 0
+      RecibirMensaje(pasos, coordinador2)
+    EnviarMensaje(cantFloresTotal, coordinador2)  {avisa que termino}
+  fin
+  
+  robot robot5
+  variables
+    pasos: numero
+    avOriginal, caOriginal, avDepo, caDepo: numero
+    cantFlores, cantFloresTotal: numero
+  comenzar
+    izquierda
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avDepo:= 1
+    caDepo:= 3
+    cantFlores:= 0
+    cantFloresTotal:= 0
+    repetir 11
+      avanzar(avOriginal, caOriginal, pasos, cantFlores, avDepo, caDepo)
+      cantFloresTotal:= cantFloresTotal + cantFlores
+      cantFlores:= 0
+      RecibirMensaje(pasos, coordinador2)
+    EnviarMensaje(cantFloresTotal, coordinador2)  {avisa que termino}
+  fin
+  
+  robot robot6
+  variables
+    pasos: numero
+    cantFlores, cantTotalFlores: numero
+    termino: numero
+  comenzar
+    repetir 11
+      Random(pasos, 3, 5)
+      EnviarMensaje(pasos, I1)
+      Random(pasos, 3, 5)
+      EnviarMensaje(pasos, I2)
+    cantTotalFlores:= 0
+    repetir 2
+      RecibirMensaje(cantFlores, *)
+      cantTotalFlores:= cantTotalFlores + cantFlores
+    EnviarMensaje(0, coordinador1)
+    RecibirMensaje(termino, coordinador1)
+    deposito(3, cantTotalFlores)
+  fin
+variables
+  S1: robot1
+  S2: robot2
+  coordinador1: robot3
+  I1: robot4
+  I2: robot5
+  coordinador2: robot6
+comenzar
+  AsignarArea(S1, area1)
+  AsignarArea(S1, deposito1)
+  AsignarArea(S2, area2)
+  AsignarArea(S2, deposito1)
+  AsignarArea(coordinador1, posCoord1)
+  AsignarArea(coordinador1, deposito1)
+  AsignarArea(I1, area3)
+  AsignarArea(I1, deposito2)
+  AsignarArea(I2, area4)
+  AsignarArea(I2, deposito2)
+  AsignarArea(coordinador2, posCoord2)
+  AsignarArea(coordinador2, deposito2)
+  Iniciar(S1, 100,98)
+  Iniciar(S2, 100,99)
+  Iniciar(coordinador1, 100,100)
+  Iniciar(I1, 100,3)
+  Iniciar(I2, 100,4)
+  Iniciar(coordinador2, 100,2)
+fin

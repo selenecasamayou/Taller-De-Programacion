@@ -1,0 +1,166 @@
+{	CORREGIDO	}
+
+programa Parcial08
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerAvenida(E av: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    Pos(av, 1)
+    repetir 99
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso accesoEsquina(E av: numero; E avenida: numero; E calle: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir cantFlores
+      BloquearEsquina(avenida, calle)
+      Pos(avenida, calle)
+      depositarFlor
+      Pos(av, 1)  {seria la siguiente avenida de la que termino}
+      LiberarEsquina(avenida, calle)
+    repetir cantPapeles
+      BloquearEsquina(avenida, calle)
+      Pos(avenida, calle)
+      depositarPapel
+      Pos(av, 1)
+      LiberarEsquina(avenida, calle)
+    cantFlores:= 0  {reinicio para la siguiente vez que deposite}
+    cantPapeles:= 0
+  fin
+  
+  proceso limpiarFlores
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  
+  proceso limpiarPapeles
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso limpiarArea  {no bloqueo las esquinas porque, como terminaron todos los robots menos el coordinador, no va a provocarse ningun choque}
+  variables
+    av: numero
+  comenzar
+    av:= 40
+    repetir 6  {cant de "avenidas" menos la ultima}
+      Pos(av, 40)
+      repetir 5  {cant de "calles"}
+        si (HayFlorEnLaEsquina)
+          limpiarFlores
+        si (HayPapelEnLaEsquina)
+          limpiarPapeles
+        mover
+      si (HayFlorEnLaEsquina)
+        limpiarFlores
+      si (HayPapelEnLaEsquina)
+        limpiarPapeles
+      av:= av + 1
+    
+  fin
+areas
+  par1: AreaP (4,1,4,100)
+  impar1: AreaP (5,1,5,100)
+  par2: AreaP (6,1,6,100)
+  impar2: AreaP (7,1,7,100)
+  par3: AreaP (8,1,8,100)
+  impar3: AreaP (9,1,9,100)
+  par4: AreaP (10,1,10,100)
+  impar4: AreaP (11,1,11,100)
+  posCoordinador: AreaP (1,1,1,1)
+  area: AreaC (40,40,45,45)
+robots
+  robot robot1
+  variables
+    id: numero
+    av, avenida, calle: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    av:= PosAv
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, coordinador)
+    repetir 3
+      recorrerAvenida(av,  cantFlores, cantPapeles)
+      av:= av + 2 {siguiente}
+      EnviarMensaje(id, coordinador)  {le avisa que termino una avenida}
+      RecibirMensaje(avenida, coordinador)
+      RecibirMensaje(calle, coordinador)
+      accesoEsquina(av, avenida, calle, cantFlores, cantPapeles)
+    recorrerAvenida(av, cantFlores, cantPapeles)
+    EnviarMensaje(id, coordinador)  {le avisa que termino el recorrido}
+    RecibirMensaje(avenida, coordinador)
+    RecibirMensaje(calle, coordinador)
+    accesoEsquina(av, avenida, calle, cantFlores, cantPapeles)
+    EnviarMensaje(id, coordinador)  {le avisa que termino el recorrido}
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    avenida, calle: numero
+    ganador: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    repetir 8  {total de avenidas}
+      RecibirMensaje(id, *)
+      si (id = 1)
+        Random(avenida, 40, 45)
+        Random(calle, 40, 45)
+        EnviarMensaje(avenida, R1)
+        EnviarMensaje(calle, R1)
+      sino
+        Random(avenida, 40, 45)
+        Random(calle, 40, 45)
+        EnviarMensaje(avenida, R2)
+        EnviarMensaje(calle, R2)
+    RecibirMensaje(id, *)
+    si (id = 1)
+      ganador:= 1  {lo guardo en una variable porque pide que lo informe una vez que terminaron ambos}
+    sino
+      ganador:= 2
+    RecibirMensaje(id, *)  {no me importa el que perdio, pero tiene que recibir el msj igual}
+    limpiarArea
+    Informar(ganador)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, par1)  
+  AsignarArea(R1, par2)    
+  AsignarArea(R1, par3)    
+  AsignarArea(R1, par4)  
+  AsignarArea(R1, area)
+  AsignarArea(R2, impar1)
+  AsignarArea(R2, impar2)
+  AsignarArea(R2, impar3)
+  AsignarArea(R2, impar4)
+  AsignarArea(R2, area)
+  AsignarArea(coordinador, posCoordinador)  
+  AsignarArea(coordinador, area)
+  Iniciar(R1, 4,1)
+  Iniciar(R2, 5,1)
+  Iniciar(coordinador, 1,1)
+fin

@@ -1,0 +1,197 @@
+{	CORREGIDO	}
+
+programa RedictadoParcial6
+procesos
+  proceso casiIzquierda
+  comenzar
+    repetir 2
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso irEsquina(E av: numero; E caActual: numero)
+  comenzar
+    BloquearEsquina(6, 6)
+    Pos(6, 6)
+    mientras (HayFlorEnLaBolsa)  {podria ser un repetir}
+      depositarFlor
+    Pos(av, caActual)
+    LiberarEsquina(6, 6)
+  fin
+  
+  proceso irEsquina2(E av: numero; E caActual: numero)
+  comenzar
+    BloquearEsquina(6, 6)
+    Pos(6, 6)
+    mientras (HayPapelEnLaBolsa)  {podria ser un repetir}
+      depositarPapel
+    Pos(av, caActual)
+    LiberarEsquina(6, 6)
+  fin
+  
+  proceso recorrerTramoIda1(ES cantFlores: numero; ES caActual: numero; ES av: numero)
+  comenzar
+    repetir 4
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    caActual:= PosCa - 2
+    av:= PosAv + 2
+    irEsquina(av, caActual)
+    repetir 4
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+  fin
+  
+  proceso recorrerTramoVuelta1(ES cantPapeles: numero; ES caActual: numero; ES av: numero)
+  comenzar
+    repetir 4
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+    caActual:= PosCa + 2
+    av:= PosAv - 2
+    irEsquina2(av, caActual)
+    repetir 4
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso recorrerTramoIda2(ES cantFlores: numero;ES caActual: numero; ES av: numero)
+  comenzar
+    repetir 4
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    caActual:= PosCa + 2
+    av:= PosAv + 2
+    irEsquina(av, caActual)
+    repetir 4
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+  fin
+  
+  proceso recorrerTramoVuelta2(ES cantPapeles: numero; ES caActual: numero; ES av: numero)
+  comenzar
+    repetir 4
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+    caActual:= PosCa - 2
+    av:= PosAv - 2
+    irEsquina2(av, caActual)
+    repetir 4
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+  fin
+areas
+  tramo1: AreaP (1,5,5,5)
+  tramo11: AreaP (7,7,11,7)
+  tramo2: AreaP (1,7,5,7)
+  tramo22: AreaP (7,5,11,5)
+  posFiscalizador: AreaP (1,6,1,6)
+  esquina: AreaPC (6,6,6,6)
+robots
+  robot robot1
+  variables
+    id: numero
+    caActual, av: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    derecha
+    av:= PosAv
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerTramoIda2(cantFlores, caActual, av)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+    casiIzquierda
+    recorrerTramoVuelta2(cantPapeles, caActual, av)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    caActual, av: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    derecha
+    av:= PosAv
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerTramoIda1(cantFlores, caActual, av)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+    casiIzquierda
+    recorrerTramoVuelta1(cantPapeles, caActual, av)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    cantObj, cantObjMax, idMax: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    cantObjMax:= -1
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantObj, R1)
+      sino
+        RecibirMensaje(cantObj, R2)
+      si (cantObj > cantObjMax)
+        cantObjMax:= cantObj
+        idMax:= id  
+    Informar(idMax)  {ganador de flores}
+    cantObjMax:= -1
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantObj, R1)
+      sino
+        RecibirMensaje(cantObj, R2)
+      si (cantObj > cantObjMax)
+        cantObjMax:= cantObj
+        idMax:= id  
+    Informar(idMax)  {ganador de papeles}
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, tramo1)
+  AsignarArea(R1, tramo11)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, tramo2)
+  AsignarArea(R2, tramo22)
+  AsignarArea(R2, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 1,5)
+  Iniciar(R2, 1,7)
+  Iniciar(fiscalizador, 1,6)
+fin

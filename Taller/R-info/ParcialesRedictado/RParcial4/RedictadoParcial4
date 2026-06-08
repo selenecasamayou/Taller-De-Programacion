@@ -1,0 +1,115 @@
+{	NO CORREGIDO	}
+
+programa RedictadoParcial4
+procesos
+  proceso buscarFlor(E av: numero; E ca: numero; E avOriginal: numero; E caOriginal: numero; ES encontre: boolean)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      encontre:= V
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(av, ca)
+  fin
+  
+  proceso esconderFlor(E av: numero; E ca: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(av, ca)
+  fin
+areas
+  pos1: AreaP (1,1,1,1)
+  pos2: AreaP (2,2,2,2)  
+  pos3: AreaP (3,3,3,3)
+  posEscondedor: AreaP (4,4,4,4)
+  area: AreaP (10,10,13,13)
+robots
+  robot robot1
+  variables  
+    id: numero
+    avOriginal, caOriginal: numero
+    av, ca: numero
+    encontre, encontro1, encontro2: boolean
+  comenzar
+    RecibirMensaje(id, escondedor)
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    Random(av, 10, 13)
+    Random(ca, 10, 13)
+    encontre:= F 
+    encontro1= F
+    encontro2= F
+    mientras ~(encontre | encontro1 | encontro2)
+      Random(av, 10, 13)
+      Random(ca, 10, 13)
+      buscarFlor(av, ca, avOriginal, caOriginal, encontre)
+      si (id = 1)
+        EnviarMensaje(encontre, R2)
+        EnviarMensaje(encontre, R3)
+        RecibirMensaje(encontro1, *) 
+        RecibirMensaje(encontro2, *) 
+      sino
+        si (id = 2)
+          EnviarMensaje(encontre, R1)
+          EnviarMensaje(encontre, R3)
+          RecibirMensaje(encontro1, *) 
+          RecibirMensaje(encontro2, *) 
+        sino
+          EnviarMensaje(encontre, R1)
+          EnviarMensaje(encontre, R2)
+          RecibirMensaje(encontro1, *) 
+          RecibirMensaje(encontro2, *) 
+    si (encontre)
+      EnviarMensaje(id, escondedor)
+    sino
+      EnviarMensaje(0, escondedor)
+  fin
+  
+  robot robot2
+  variables  
+    id: numero
+    avOriginal, caOriginal: numero
+    av, ca: numero
+  comenzar
+    EnviarMensaje(1, R1)    
+    EnviarMensaje(2, R2)    
+    EnviarMensaje(3, R3)    
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    Random(av, 10, 13)
+    Random(ca, 10, 13)
+    esconderFlor(av, ca, avOriginal, caOriginal) 
+    repetir 3
+      RecibirMensaje(id, *)
+      si (id = 1)
+        Informar(1)
+      sino
+        si (id = 2)
+          Informar(2)
+        sino
+          si (id = 3)
+            Informar(3)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  escondedor: robot2  {escondedor}
+comenzar
+  AsignarArea(R1, pos1)
+  AsignarArea(R1, area)
+  AsignarArea(R2, pos2)
+  AsignarArea(R2, area)
+  AsignarArea(R3, pos3)
+  AsignarArea(R3, area)
+  AsignarArea(escondedor, posEscondedor)
+  AsignarArea(escondedor, area)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 2,2)
+  Iniciar(R3, 3,3)
+  Iniciar(escondedor, 4,4)
+fin

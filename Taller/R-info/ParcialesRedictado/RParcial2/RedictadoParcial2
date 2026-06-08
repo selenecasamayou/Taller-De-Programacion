@@ -1,0 +1,162 @@
+{	PSEUDOCODIGO	}
+
+programa RedictadoParcial2
+procesos
+  proceso juntarFlores
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  
+  proceso recorrer(E pasos: numero)
+  comenzar
+    repetir pasos
+      si (PosAv < 21)
+        mover
+    juntarFlores  {en donde quedo junta}
+  fin
+  
+  proceso juntarPapeles
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso recorrer2(E pasos: numero)
+  comenzar
+    repetir pasos
+      si (PosAv < 21)
+        mover
+    juntarPapeles  {en donde quedo junta}
+  fin
+areas
+  calle1: AreaP (10,12,40,12)
+  calle2: AreaP (10,10,40,10)
+  calle3: AreaP (10,8,40,8)
+  calle4: AreaP (10,6,40,6)
+  posFiscalizador: AreaP (20,15,20,15)
+robots
+  robot robot1
+  variables
+    id: numero
+    pasos, calle: numero
+    termine: boolean
+  comenzar
+    derecha
+    termine:= V
+    calle:= PosCa
+    RecibirMensaje(id, fiscalizador)
+    EnviarMensaje(id, fiscalizador)  {le avisa para avanzar}
+    EnviarMensaje(V, fiscalizador)  {la primera vez va a ser falso}
+    mientras (PosAv < 21)  {primera fase} 
+      RecibirMensaje(pasos, fiscalizador)
+      recorrer(pasos)
+      EnviarMensaje(id, fiscalizador)
+      si (PosAv < 21)  {para guardarme el id ganador}
+        EnviarMensaje(F, fiscalizador)
+      sino
+        EnviarMensaje(V, fiscalizador)
+    EnviarMensaje(0, fiscalizador)  {fin de una fase}    
+    EnviarMensaje(id, fiscalizador)
+    si (id = 1)
+      EnviarMensaje(termine, R2)
+      EnviarMensaje(termine, R3)
+      EnviarMensaje(termine, R4)
+    sino
+      si (id = 2)
+        EnviarMensaje(termine, R1)
+        EnviarMensaje(termine, R3)
+        EnviarMensaje(termine, R4)
+      sino
+        si (id = 3)
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+          EnviarMensaje(termine, R4)
+        sino
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+          EnviarMensaje(termine, R3)
+    repetir 3
+      RecibirMensaje(termine, *)
+    Pos(25, calle)
+    EnviarMensaje(id, fiscalizador)  {le avisa para avanzar}
+    EnviarMensaje(V, fiscalizador)  {la primera vez va a ser falso}
+    mientras (PosAv < 41)  {segunda fase} 
+      RecibirMensaje(pasos, fiscalizador)
+      recorrer2(pasos)
+      EnviarMensaje(id, fiscalizador)
+      si (PosAv < 21)  {para guardarme el id ganador}
+        EnviarMensaje(F, fiscalizador)
+      sino
+        EnviarMensaje(V, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id, pasos: numero
+    robotsFin, ganador: numero
+    termino: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    EnviarMensaje(4, R4)
+    repetir 2
+      robotsFin:= 0
+      mientras (robotsFin < 4) 
+        RecibirMensaje(id, *)
+        Random(pasos, 1, 3)
+        si (id = 1)
+          RecibirMensaje(termino, R1)
+          si ~(termino)
+            EnviarMensaje(pasos, R1)
+          sino
+            si (robotsFin = 0)
+              ganador:= id
+            robotsFin:= robotsFin + 1
+        sino
+          si (id = 2)    
+            RecibirMensaje(termino, R2)
+            si ~(termino)
+              EnviarMensaje(pasos, R2)
+            sino
+              si (robotsFin = 0)
+                ganador:= id
+              robotsFin:= robotsFin + 1
+          sino
+            si (id = 3)
+              RecibirMensaje(termino, R3)
+              si ~(termino)
+                EnviarMensaje(pasos, R3)
+              sino
+                si (robotsFin = 0)
+                  ganador:= id
+                robotsFin:= robotsFin + 1
+            sino
+              RecibirMensaje(termino, R4)
+              si ~(termino)
+                EnviarMensaje(pasos, R4)
+              sino
+                si (robotsFin = 0)
+                  ganador:= id 
+                robotsFin:= robotsFin + 1     
+      {Informar(ganador) dice al final pero sino tengo que escribir todo de vuelta}
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  R4: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, calle1)
+  AsignarArea(R2, calle2)
+  AsignarArea(R3, calle3)
+  AsignarArea(R4, calle4)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 10,12)
+  Iniciar(R2, 10,10)
+  Iniciar(R3, 10,8)
+  Iniciar(R4, 10,6)
+  Iniciar(fiscalizador, 20,15)
+fin

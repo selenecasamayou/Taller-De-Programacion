@@ -1,0 +1,110 @@
+{	CORREGIDO	
+programa RedictadoParcial9
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso hacerCuadrado(E lado: numero; ES cantFlores: numero; E avOriginal: numero; ES caOriginal: numero)
+  comenzar
+    repetir 4
+      repetir lado
+        juntarFlores(cantFlores)
+        mover
+      derecha
+    juntarFlores(cantFlores)  {seria la ultima esquina}
+    caOriginal:= caOriginal + lado + 1
+    si (caOriginal < 18)
+      Pos(avOriginal, caOriginal)
+  fin
+  
+  proceso IrADepositar(E avOriginal: numero; E caOriginal: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(50, 50)
+    Pos(50, 50)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(50, 50)
+  fin
+  
+  proceso depositar(E cantFloresTotal: numero)
+  comenzar
+    Pos(50, 50)
+    repetir cantFloresTotal
+      tomarFlor
+  fin
+areas
+  area1: AreaP (1,1,6,18)
+  area2: AreaP (8,1,13,18)
+  area3: AreaP (15,1,20,18)
+  posServidor: AreaP (22,1,22,1)
+  esquina: AreaP (50,50,50,50)
+robots
+  robot robot1
+  variables
+    id: numero
+    lado: numero
+    avOriginal, caOriginal: numero
+    cantFlores: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantFlores:= 0
+    RecibirMensaje(id, servidor)
+    repetir 3
+      EnviarMensaje(id, servidor)
+      RecibirMensaje(lado, servidor)
+      hacerCuadrado(lado, cantFlores, avOriginal, caOriginal)
+    repetir cantFlores
+      IrADepositar(avOriginal, caOriginal, cantFlores)
+    EnviarMensaje(cantFlores, servidor)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    lado: numero
+    cantFlores, cantFloresTotal: numero
+  comenzar
+    EnviarMensaje(1, C1)
+    EnviarMensaje(2, C2)
+    EnviarMensaje(3, C3)
+    repetir 9
+      RecibirMensaje(id, *)
+      Random(lado, 1, 5)
+      si (id = 1)
+        EnviarMensaje(lado, C1)
+      sino
+        si (id = 2)
+          EnviarMensaje(lado, C2)
+        sino
+          EnviarMensaje(lado, C3)
+    cantFloresTotal:= 0
+    repetir 3
+      RecibirMensaje(cantFlores, *)
+      cantFloresTotal:= cantFloresTotal + cantFlores
+    depositar(cantFloresTotal)
+    Informar(cantFloresTotal)
+  fin
+variables
+  C1: robot1
+  C2: robot1
+  C3: robot1
+  servidor: robot2
+comenzar
+  AsignarArea(C1, area1)
+  AsignarArea(C1, esquina)
+  AsignarArea(C2, area2)
+  AsignarArea(C2, esquina)
+  AsignarArea(C3, area3)
+  AsignarArea(C3, esquina)
+  AsignarArea(servidor, posServidor)
+  AsignarArea(servidor, esquina)
+  Iniciar(C1, 1,1)
+  Iniciar(C2, 8,1)
+  Iniciar(C3, 15,1)
+  Iniciar(servidor, 22,1)
+fin
