@@ -1,0 +1,178 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoParcial8
+procesos
+  proceso unaEsquina(ES cantPapeles: numero)
+  comenzar
+    si ~(HayPapelEnLaEsquina)
+      depositarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerCalle(E caOriginal: numero; ES cantPapeles: numero)
+  variables
+    avAnt, avSig: numero
+  comenzar
+    unaEsquina(cantPapeles)  {la primera esquina}
+    BloquearEsquina(2, caOriginal)  {la primera vez bloquea afuera}
+    mover
+    avAnt:= PosAv
+    avSig:= PosAv + 1
+    repetir 33  {hace desde la 2 a 34}
+      unaEsquina(cantPapeles)
+      BloquearEsquina(avSig, caOriginal)
+      mover
+      LiberarEsquina(avAnt, caOriginal)
+      avAnt:= PosAv
+      avSig:= PosAv + 1
+    unaEsquina(cantPapeles)  {hace esquina 35}
+    mover
+    LiberarEsquina(avSig, caOriginal)  {y la ultima vez libera afuera}
+    repetir 64
+      unaEsquina(cantPapeles)  {hace desde la 36 a 99}
+      mover
+    unaEsquina(cantPapeles)  {hace esquina 100}
+  fin
+  
+  proceso verFlores(ES cantFlores: numero)
+  comenzar
+    si ~(HayFlorEnLaEsquina)
+      depositarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso esquinaConChoque(E av: numero; E ca: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    mover
+    verFlores(cantFlores)
+    mover
+    LiberarEsquina(av, ca)
+  fin
+  
+  proceso recorrerAvenida(E av: numero; ES cantFlores: numero)
+  comenzar
+    Pos(av, 1)
+    repetir 6
+      verFlores(cantFlores)  {hace esquina 1 a 6}
+      mover
+    verFlores(cantFlores)  {hace esquina 7}
+    esquinaConChoque(av, 8, cantFlores)
+    repetir 5
+      verFlores(cantFlores)  {hace esquina 9 a 13}
+      mover
+    verFlores(cantFlores)  {hace esquina 14}
+    esquinaConChoque(av, 15, cantFlores)
+    repetir 84
+      verFlores(cantFlores)  {hace esquina 16 a 99}
+      mover
+    verFlores(cantFlores)  {hace esquina 100}
+  fin
+areas
+  areaPapelero01: AreaP (1,8,1,8)
+  areachoque1: AreaPC (2,8,35,8)
+  areaPapelero1: AreaP (36,8,100,8)
+  areaPapelero02: AreaP (1,15,1,15)
+  areachoque2: AreaPC (2,15,35,15)
+  areaPapelero2: AreaP (36,15,100,15)
+  areaFlorero1: AreaP (2,1,35,7)
+  areaFlorero2: AreaP (2,9,35,14)
+  areaFlorero3: AreaP (2,16,35,100)
+  posFlorero: AreaP (1,2,1,2)
+  posFiscalizador: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantPapeles: numero
+    gane: boolean
+  comenzar
+    derecha
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerCalle(caOriginal, cantPapeles)
+    EnviarMensaje(id, fiscalizador)
+    RecibirMensaje(gane, fiscalizador)
+    si (gane)
+      Pos(avOriginal, caOriginal)
+      Informar(cantPapeles)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    av: numero
+    avOriginal, caOriginal: numero
+    cantFlores: numero
+    gane: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    RecibirMensaje(av, fiscalizador)
+    recorrerAvenida(av, cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    RecibirMensaje(gane, fiscalizador)
+    si (gane)
+      Pos(avOriginal, caOriginal)
+      Informar(cantFlores)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    av: numero
+  comenzar
+    EnviarMensaje(1, RP1)
+    EnviarMensaje(2, RP2)
+    EnviarMensaje(3, RF)
+    Random(av, 2, 35)
+    EnviarMensaje(av, RF)
+    RecibirMensaje(id, *)
+    si (id = 1)
+      EnviarMensaje(V, RP1)
+      EnviarMensaje(F, RP2)
+      EnviarMensaje(F, RF)
+    sino
+      si (id = 2)
+        EnviarMensaje(V, RP2)
+        EnviarMensaje(F, RP1)
+        EnviarMensaje(F, RF)
+      sino
+        EnviarMensaje(V, RF)
+        EnviarMensaje(F, RP1)        
+        EnviarMensaje(F, RP2)
+    repetir 2
+      RecibirMensaje(id, *)
+  fin
+variables
+  RP1: robot1
+  RP2: robot1  
+  RF: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(RP1, areaPapelero01)
+  AsignarArea(RP1, areachoque1)
+  AsignarArea(RP1, areaPapelero1)
+  AsignarArea(RP2, areaPapelero02)
+  AsignarArea(RP2, areachoque2)
+  AsignarArea(RP2, areaPapelero2)
+  AsignarArea(RF, areaFlorero1)
+  AsignarArea(RF, areachoque1)
+  AsignarArea(RF, areaFlorero2)
+  AsignarArea(RF, areachoque2)
+  AsignarArea(RF, areaFlorero3)
+  AsignarArea(RF, posFlorero)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(RP1, 1,8)
+  Iniciar(RP2, 1,15)
+  Iniciar(RF, 1,2)
+  Iniciar(fiscalizador, 1,1)
+fin

@@ -1,0 +1,83 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica01Ej3
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  variables
+    cantF: numero
+  comenzar
+    cantF:= 0
+    mientras (HayFlorEnLaEsquina) 
+      cantF:= cantF + 1
+    cantFlores:= cantFlores + cantF
+    repetir cantF
+      depositarFlor
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  variables
+    cantP: numero
+  comenzar
+    cantP:= 0
+    mientras (HayPapelEnLaEsquina) 
+      cantP:= cantP + 1
+    cantPapeles:= cantPapeles + cantP
+    repetir cantP
+      depositarPapel
+  fin
+  
+  proceso recorrerEscalon(E escalon: numero; ES cantEscalones: numero)
+  variables
+    cantFlores, cantPapeles: numero
+  comenzar
+    cantFlores:= 0
+    cantPapeles:= 0
+    repetir escalon
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    derecha
+    repetir escalon
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    izquierda
+    si (cantPapeles = (cantFlores + 1)) 
+      cantEscalones:= cantEscalones + 1
+  fin
+areas
+  escalera1: AreaP (12,14,22,24)
+  escalera2: AreaP (17,10,27,20)
+  escalera3: AreaP (22,6,32,16)
+robots
+  robot robot1
+  variables
+    escalon, cantEscalones: numero
+  comenzar
+    escalon:= 0
+    repetir 4
+      escalon:= escalon + 1
+      recorrerEscalon(escalon, cantEscalones)
+    Informar(cantEscalones)  
+  fin
+variables
+  R1: robot1
+  R2: robot1  
+  R3: robot1
+comenzar
+  AsignarArea(R1, escalera1)
+  AsignarArea(R2, escalera2)
+  AsignarArea(R3, escalera3)
+  Iniciar(R1, 12,14)
+  Iniciar(R2, 17,10)
+  Iniciar(R3, 22,6)
+fin

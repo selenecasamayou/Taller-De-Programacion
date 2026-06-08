@@ -1,0 +1,132 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial12
+procesos
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso esquinaBloqueada(ES cantPapeles: numero; E avActual: numero; E caActual: numero)
+  comenzar
+    BloquearEsquina(11,50)
+    mover
+    juntarPapeles(cantPapeles)
+    Pos(avActual, caActual)
+    LiberarEsquina(11,50)
+  fin
+  
+  proceso recorrerAvenida(ES cantPapeles: numero)
+  variables
+    avActual, caActual: numero
+  comenzar
+    si (PosCa = 100)
+      repetir 49
+        juntarPapeles(cantPapeles)
+        mover
+    sino
+      repetir 48  {hasta la anterior al choque}
+        juntarPapeles(cantPapeles)
+        mover
+    juntarPapeles(cantPapeles) {junta en la 49/51}
+    avActual:= PosAv
+    caActual:= PosCa
+    esquinaBloqueada(cantPapeles, avActual, caActual)
+    repetir 2
+      derecha
+    si (HayFlorEnLaBolsa)
+      depositarFlor
+    repetir 48  {hasta la inicial}
+      si (HayFlorEnLaBolsa)
+        depositarFlor
+      mover    
+  fin
+  
+  proceso accesoEsquinaGanador
+  comenzar
+    BloquearEsquina(11,50)
+    Pos(11,50)
+    mientras (HayPapelEnLaEsquina)  {como no esta explicado lo dejo asi}
+      tomarPapel
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor  
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(11,50)
+  fin
+areas
+  area1: AreaP (11,1,11,49) 
+  esquina: AreaPC (11,50,11,50) 
+  area2: AreaP (11,51,11,100)
+  posCoordinador: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantPapeles: numero
+    gane: boolean
+  comenzar
+    avOriginal:= PosAv 
+    caOriginal:= PosCa
+    cantPapeles:= 0
+    RecibirMensaje(id, coordinador)
+    si (id = 1)
+      recorrerAvenida(cantPapeles)
+    sino
+      repetir 2 {para que mire al otro lado} 
+        derecha
+      recorrerAvenida(cantPapeles)
+    EnviarMensaje(id, coordinador)
+    EnviarMensaje(cantPapeles, coordinador)
+    RecibirMensaje(gane, coordinador)
+    si (gane)
+      accesoEsquinaGanador(avOriginal, caOriginal)
+      EnviarMensaje(id, coordinador)  {le avisa que termino para que vaya el perdedor}
+    sino
+      RecibirMensaje(gane, coordinador)  {le envia la confirmacion de que termino el ganador}
+      accesoEsquinaPerdedor
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantJuntadaA, cantJuntadaB: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntadaA, R1)
+      sino 
+        RecibirMensaje(cantJuntadaB, R2)
+    si (cantJuntadaA > cantJuntadaB)
+      EnviarMensaje(V, R1)
+      EnviarMensaje(F, R2)
+      RecibirMensaje(id, R1)
+      EnviarMensaje(F, R2)  {para que siga}
+    sino
+      EnviarMensaje(V, R2)
+      EnviarMensaje(F, R1)
+      RecibirMensaje(id, R2)
+      EnviarMensaje(F, R1)  {para que siga}
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, esquina)
+  AsignarArea(coordinador, posCoordinador)
+  Iniciar(R1, 11,1)
+  Iniciar(R2, 11,100)
+  Iniciar(coordinador, 1,1)
+fin

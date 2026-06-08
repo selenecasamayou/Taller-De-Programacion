@@ -1,0 +1,156 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial1
+procesos
+  proceso juntarFloresYPapeles(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerAlto(E alto: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir alto
+      juntarFloresYPapeles(cantFlores, cantPapeles)
+      mover
+    juntarFloresYPapeles(cantFlores, cantPapeles)
+  fin
+  
+  proceso recorrerAncho(E ancho: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir ancho
+      juntarFloresYPapeles(cantFlores, cantPapeles)
+      mover
+    juntarFloresYPapeles(cantFlores, cantPapeles)
+  fin
+  
+  proceso deposito1(E avActual: numero; E caActual: numero E cantFlores: numero)
+  comenzar
+    BloquearEsquina(21, 21)
+    Pos(21, 21)
+    depositarFlor
+    Pos(avActual, caActual)
+    LiberarEsquina(21, 21)
+  fin
+  
+  proceso deposito2(E avActual: numero; E caActual: numero E cantPapeles: numero)
+  comenzar
+    BloquearEsquina(22, 22)
+    Pos(22, 22)
+    depositarPapel
+    Pos(avActual, caActual)
+    LiberarEsquina(22, 22)
+  fin
+  
+  proceso dejarElementos(E avActual: numero; E caActual: numero ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    mientras(cantFlores > 0)
+      deposito1(avActual, caActual, cantFlores)
+      cantFlores:= cantFlores - 1
+    mientras(cantPapeles > 0)
+      deposito2(avActual, caActual, cantPapeles)
+      cantPapeles:= cantPapeles - 1
+  fin
+areas
+  area1: AreaP (1,1,20,20)
+  area2: AreaP (21,1,40,20)
+  posCoordinador: AreaP (23,23,23,23)
+  esquinaF: AreaPC (21,21,21,21)
+  esquinaP: AreaPC (22,22,22,22)
+robots
+  robot robot1
+  variables
+    id: numero
+    alto, ancho: numero
+    avActual, caActual: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    avActual:= PosAv 
+    caActual:= PosCa
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, coordinador)
+    RecibirMensaje(alto, coordinador)
+    RecibirMensaje(ancho, coordinador)
+    repetir 2
+      recorrerAlto(alto, cantFlores, cantPapeles)
+      EnviarMensaje(id, coordinador)
+      EnviarMensaje(cantFlores, coordinador)
+      EnviarMensaje(cantPapeles, coordinador)
+      avActual:= PosAv 
+      caActual:= PosCa
+      dejarElementos(avActual, caActual, cantFlores, cantPapeles)
+      recorrerAncho(ancho, cantFlores, cantPapeles)
+      EnviarMensaje(id, coordinador)
+      EnviarMensaje(cantFlores, coordinador)
+      EnviarMensaje(cantPapeles, coordinador)
+      avActual:= PosAv 
+      caActual:= PosCa
+      dejarElementos(avActual, caActual, cantFlores, cantPapeles)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    alto, ancho: numero
+    cantJuntada: numero 
+    cantFloresR1, cantFloresR2, cantPapelesR1, cantPapelesR2: numero 
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    Random(alto, 1, 20)
+    Random(ancho, 1, 20)
+    EnviarMensaje(R1, alto)
+    EnviarMensaje(R1, ancho)
+    Random(alto, 1, 20)
+    Random(ancho, 1, 20)
+    EnviarMensaje(R2, alto)
+    EnviarMensaje(R2, ancho)
+    cantFloresR1:= 0 
+    cantFloresR2:= 0 
+    cantPapelesR1:= 0
+    cantPapelesR2:= 0
+    repetir 8
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, R1)
+        cantFloresR1:= cantFloresR1 + cantJuntada
+        RecibirMensaje(cantJuntada, R1)
+        cantPapelesR1:= cantPapelesR1 + cantJuntada
+      sino
+        RecibirMensaje(cantJuntada, R2)
+        cantFloresR2:= cantFloresR2 + cantJuntada
+        RecibirMensaje(cantJuntada, R2)
+        cantPapelesR2:= cantPapelesR2 + cantJuntada
+    si (cantFloresR1 > cantFloresR2) {max flores}
+      Informar(1)
+    sino
+      Informar(2)
+    si (cantPapelesR1 > cantPapelesR2) {max papeles}
+      Informar(1)
+    sino
+      Informar(2)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, esquinaF)
+  AsignarArea(R1, esquinaP)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, esquinaF)
+  AsignarArea(R2, esquinaP)
+  AsignarArea(coordinador, posCoordinador)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 21,1)
+  Iniciar(coordinador, 23,23)
+fin

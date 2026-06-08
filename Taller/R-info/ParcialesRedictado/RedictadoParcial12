@@ -1,0 +1,176 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoParcial12
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso unaAv(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 99
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso depositarF(E av: numero; E ca: numero; E avOriginal: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    depositarFlor
+    Pos(avOriginal, 100)  {quedo al final de su av actual}
+    LiberarEsquina(av, ca)
+  fin
+  
+  proceso depositarP(E av: numero; E ca: numero; E avOriginal: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    depositarPapel
+    Pos(avOriginal, 100)  {quedo al final de su av actual}
+    LiberarEsquina(av, ca)
+  fin
+  
+  proceso irADepositar(E av: numero; E ca: numero; E avOriginal: numero; E cantFlores: numero; E cantPapeles: numero)
+  comenzar
+    repetir cantFlores
+      depositarF(av, ca, avOriginal)
+    repetir cantPapeles  
+      depositarP(av, ca, avOriginal)
+  fin
+  
+  proceso juntarFlores2
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  
+  proceso juntarPapeles2
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso limpiarAv
+  comenzar
+    repetir 5
+      si (HayFlorEnLaEsquina)
+        juntarFlores2  {uso otro porque no me interesa guardar cuantas junto}
+      si (HayPapelEnLaEsquina)
+        juntarPapeles2
+      mover
+    si (HayFlorEnLaEsquina)
+      juntarFlores2  
+    si (HayPapelEnLaEsquina)
+      juntarPapeles2
+  fin
+  
+  proceso limpiarArea
+  variables  
+    av: numero
+  comenzar
+    Pos(40, 40)
+    av:= PosAv
+    repetir 5
+      limpiarAv
+      av:= av + 1
+      Pos(av, 40)
+    limpiarAv
+  fin
+areas
+  par1: AreaP (4,1,4,100)
+  impar1: AreaP (5,1,5,100)
+  par2: AreaP (6,1,6,100)
+  impar2: AreaP (7,1,7,100)
+  par3: AreaP (8,1,8,100)
+  impar3: AreaP (9,1,9,100)
+  par4: AreaP (10,1,10,100)
+  impar4: AreaP (11,1,11,100)
+  posFiscalizador: AreaP (1,1,1,1)
+  area: AreaC (40,40,45,45)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal: numero
+    av, ca: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    avOriginal:= PosAv
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, coordinador)
+    repetir 3
+      unaAv(cantFlores, cantPapeles)
+      RecibirMensaje(av, coordinador)
+      RecibirMensaje(ca, coordinador)
+      irADepositar(av, ca, avOriginal, cantFlores, cantPapeles)
+      cantFlores:= 0
+      cantPapeles:= 0
+      avOriginal:= PosAv + 2  {actualiza}
+      Pos(avOriginal, 1)  {se posiciona en la siguiente}
+    unaAv(cantFlores, cantPapeles)  {tiene que estar a parte porque sino}
+    RecibirMensaje(av, coordinador)  {va a moverse fuera del area}
+    RecibirMensaje(ca, coordinador)
+    irADepositar(av, ca, avOriginal, cantFlores, cantPapeles)
+    EnviarMensaje(id, coordinador)  {avisa que termino}
+  fin
+  
+  robot robot2
+  variables
+    id, idGanador: numero
+    av, ca: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    repetir 4
+      Random(av, 40, 45)
+      Random(ca, 40, 45)
+      EnviarMensaje(av, R1)
+      EnviarMensaje(ca, R1)
+      Random(av, 40, 45)
+      Random(ca, 40, 45)
+      EnviarMensaje(av, R2)
+      EnviarMensaje(ca, R2)
+    RecibirMensaje(idGanador, *)  {el primero en mandar queda como ganador}
+    RecibirMensaje(id, *)  {este no me importa}
+    limpiarArea
+    Informar(idGanador)
+  fin
+variables
+  R1: robot1
+  R2: robot1  
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, par1)
+  AsignarArea(R1, par2)
+  AsignarArea(R1, par3)
+  AsignarArea(R1, par4)
+  AsignarArea(R1, area)
+  AsignarArea(R2, impar1)
+  AsignarArea(R2, impar2)
+  AsignarArea(R2, impar3)
+  AsignarArea(R2, impar4)
+  AsignarArea(R2, area)
+  AsignarArea(coordinador, posFiscalizador)
+  AsignarArea(coordinador, area)
+  Iniciar(R1, 4,1)
+  Iniciar(R2, 5,1)
+  Iniciar(coordinador, 1,1)
+fin

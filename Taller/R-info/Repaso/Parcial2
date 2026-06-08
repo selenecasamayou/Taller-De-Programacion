@@ -1,0 +1,181 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial2
+procesos
+  proceso accederBaseFlores(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12,11)
+    Pos(12,11)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12,11)
+  fin
+    
+  proceso accederFuenteFlores(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    Pos(10, 12)
+    tomarFlor
+    accederBaseFlores(avOriginal, caOriginal)
+  fin
+  
+  proceso dejarFlor(ES avOriginal: numero; ES caOriginal: numero)
+  comenzar
+    depositarFlor
+    mover
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+  fin
+  
+  proceso accederBasePapeles(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12,11)
+    Pos(12,11)
+    depositarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12,11)
+  fin
+    
+  proceso accederFuentePapeles(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    Pos(10, 10)
+    tomarPapel
+    accederBasePapeles(avOriginal, caOriginal)
+  fin
+  
+  proceso dejarPapel(ES avOriginal: numero; ES caOriginal: numero)
+  comenzar
+    depositarPapel
+    mover
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+  fin
+  
+  proceso agarrarFlor(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12,11)
+    Pos(12,11)
+    tomarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12,11)
+    dejarFlor(avOriginal, caOriginal)
+  fin
+  
+  proceso agarrarPapel(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12,11)
+    Pos(12,11)
+    tomarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12,11)
+    dejarPapel(avOriginal, caOriginal)
+  fin
+areas
+  rec1: AreaP (11,12,11,12)  {rec flores}
+  ca1: AreaP (12,12,12,100)  {dep flores}  
+  rec2: AreaP (11,10,11,10)  {rec papeles}
+  ca2: AreaP (12,10,12,100)  {dep papeles}
+  fuenteF: AreaP (10,12,10,12)
+  fuenteP: AreaP (10,10,10,10)
+  base: AreaPC (12,11,12,11)  
+  posFiscalizador: AreaP (20,11,20,11)
+robots
+  robot robot1
+  variables
+    avOriginal, caOriginal: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(seguir)
+    mientras(seguir <> F)
+      accederFuenteFlores(avOriginal, caOriginal)
+      EnviarMensaje(seguir, R2)
+      RecibirMensaje(seguir, R2) {espera para saber si termino la calle}
+  fin
+  
+  robot robot2
+  variables
+    seguir: boolean
+    avOriginal, caOriginal: numero
+  comenzar
+    derecha
+    seguir:= V
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    mientras(PosAv < 100)
+      EnviarMensaje(seguir, R1)
+      RecibirMensaje(seguir, R1) {espera a que deposite la flor}
+      agarrarFlor(avOriginal, caOriginal)
+    EnviarMensaje(F, R1)
+    EnviarMensaje(1, fiscalizador)  {equipo 1}
+  fin
+  
+  robot robot3
+  variables
+    avOriginal, caOriginal: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(seguir)
+    mientras(seguir <> F)
+      accederFuentePapeles(avOriginal, caOriginal)
+      EnviarMensaje(seguir, A2)
+      RecibirMensaje(seguir, A2) {espera para saber si termino la calle}
+  fin
+  
+  robot robot4
+  variables
+    seguir: boolean
+    avOriginal, caOriginal: numero
+  comenzar
+    derecha
+    seguir:= V
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    mientras(PosAv < 100)
+      EnviarMensaje(seguir, A1)
+      RecibirMensaje(seguir, A1) {espera a que deposite la flor}
+      agarrarPapel(avOriginal, caOriginal)
+    EnviarMensaje(F, A1)
+    EnviarMensaje(1, fiscalizador)  {equipo 1}
+  fin
+  
+  robot robot5
+  variables
+    termino: numero
+  comenzar
+    RecibirMensaje(termino, *)  {solo lo envia el depositador}
+    si (termino = 1)
+      Informar(termino)  {gana equipo 1}
+    sino
+      Informar(termino)  {gana equipo 2}
+    RecibirMensaje(termino, *)  {perdedor, no importa}
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  A1: robot3
+  A2: robot4
+  fiscalizador: robot5
+comenzar
+  AsignarArea(R1, rec1)
+  AsignarArea(R1, fuenteF)
+  AsignarArea(R1, base)
+  AsignarArea(R2, ca1)
+  AsignarArea(R2, base)
+  AsignarArea(A1, rec2)
+  AsignarArea(A1, fuenteP)
+  AsignarArea(A1, base)
+  AsignarArea(A2, ca2)
+  AsignarArea(A2, base)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 11,12)
+  Iniciar(R2, 12,12)
+  Iniciar(A1, 11,10)
+  Iniciar(A2, 12,10)
+  Iniciar(fiscalizador, 20,11)
+fin

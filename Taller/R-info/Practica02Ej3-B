@@ -1,0 +1,119 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica02Ej3_B
+procesos
+  proceso juntarFlores (ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles (ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+
+  proceso recorrerCalle1(ES cantPapeles: numero)
+  comenzar
+    repetir 9
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)  
+  fin
+    
+  proceso recorrerCalle2(ES cantFlores: numero)
+  comenzar
+    cantFlores:= 0
+    repetir 9
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)  
+  fin
+areas
+  area1: AreaPC (1,1,40,1)
+  area2: AreaPC (1,5,40,5)
+robots
+  robot equipo1
+  variables
+    cantPapeles: numero
+  comenzar
+    derecha
+    cantPapeles:= 0
+    recorrerCalle1(cantPapeles)
+    EnviarMensaje(cantPapeles, A2)
+    {---------------------------------}
+    RecibirMensaje(cantPapeles, A2) {ahora, hasta que no termine el 1 recorrido A2, no sigue}
+    Pos(21,1)
+    recorrerCalle2(cantPapeles)
+    EnviarMensaje(cantPapeles, A2)
+  fin
+  
+  robot equipo2
+  variables 
+    sumaPapeles, cantPapeles: numero
+  comenzar
+    derecha
+    RecibirMensaje(sumaPapeles, A1)
+    recorrerCalle1(cantPapeles)
+    sumaPapeles:= sumaPapeles + cantPapeles  {cant recibida + cant propia}
+    Informar(sumaPapeles)
+    EnviarMensaje(sumaPapeles, A1)
+    {---------------------------------}
+    Pos(31,1)
+    RecibirMensaje(cantPapeles, A1)
+    recorrerCalle2(cantPapeles)
+    Informar(cantPapeles)
+  fin
+  
+  robot equipo3
+  variables
+    cantFlores: numero
+  comenzar
+    derecha
+    cantFlores:= 0
+    recorrerCalle2(cantFlores)
+    EnviarMensaje(cantFlores, B2)
+    {---------------------------------}
+    RecibirMensaje(cantFlores, B2) {ahora, hasta que no termine el 1 recorrido B2, no sigue}
+    Pos(21,5)
+    recorrerCalle2(cantFlores)
+    EnviarMensaje(cantFlores, B2)
+  fin
+  
+  robot equipo4
+  variables
+    sumaFlores, cantFlores: numero
+  comenzar
+    derecha
+    RecibirMensaje(sumaFlores, B1)  {una manera}
+    recorrerCalle2(cantFlores)
+    sumaFlores:= sumaFlores + cantFlores
+    Informar(sumaFlores)
+    EnviarMensaje(sumaFlores, B1)
+    {---------------------------------}
+    Pos(31,5)
+    RecibirMensaje(cantFlores, B1)  {otra manera}
+    recorrerCalle2(cantFlores)
+    Informar(cantFlores)
+  fin  
+variables
+  A1: equipo1
+  A2: equipo2
+  B1: equipo3
+  B2: equipo4
+comenzar
+  AsignarArea(A1, area1)
+  AsignarArea(A2, area1)
+  AsignarArea(B1, area2)
+  AsignarArea(B2, area2)
+  Iniciar(A1, 1,1)
+  Iniciar(A2, 11,1)
+  Iniciar(B1, 1,5)
+  Iniciar(B2, 11,5)
+fin

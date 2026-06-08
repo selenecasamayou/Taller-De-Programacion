@@ -1,0 +1,119 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica03Ej1
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso verEsquina(E av: numero; E ca: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    juntarFlores(cantFlores)
+  fin
+  
+  proceso accesoEsquina(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(10,10)
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso verEsquina2(E av: numero; E ca: numero; ES cantPapeles: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso accesoEsquina2(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    depositarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(10,10)
+  fin
+areas
+  posInicial1: AreaP (6,10,6,10)
+  posInicial2: AreaP (7,10,7,10)
+  areaF: AreaPC (1,1,5,10)
+  posInicial3: AreaP (8,10,8,10)
+  posInicial4: AreaP (9,10,9,10)
+  areaP: AreaPC (6,1,10,9)
+  areaGeneral: AreaC (10,10,10,10)
+robots
+  robot robot1
+  variables
+    avOriginal, caOriginal: numero
+    av, ca, cantFlores: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantFlores:= 0
+    repetir 5
+      Random(av,1,5)
+      Random(ca,1,10)
+      verEsquina(av, ca, cantFlores)
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(av, ca)
+    repetir cantFlores
+      accesoEsquina(avOriginal, caOriginal)  
+  fin
+  
+  robot robot2
+  variables
+    avOriginal, caOriginal: numero
+    av, ca, cantPapeles: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantPapeles:= 0
+    repetir 3
+      Random(av,6,10)
+      Random(ca,1,9)
+      verEsquina2(av, ca, cantPapeles)
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(av, ca)
+    repetir cantPapeles
+      accesoEsquina2(avOriginal, caOriginal)  
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot2
+  R4: robot2
+comenzar
+  AsignarArea(R1, posInicial1)
+  AsignarArea(R1, areaF)
+  AsignarArea(R1, areaGeneral)
+  AsignarArea(R2, posInicial2)
+  AsignarArea(R2, areaF)
+  AsignarArea(R2, areaGeneral)
+  AsignarArea(R3, posInicial3)
+  AsignarArea(R3, areaP)
+  AsignarArea(R3, areaGeneral)
+  AsignarArea(R4, posInicial4)
+  AsignarArea(R4, areaP)
+  AsignarArea(R4, areaGeneral)
+  Iniciar(R1, 6,10)
+  Iniciar(R2, 7,10)
+  Iniciar(R3, 8,10)
+  Iniciar(R4, 9,10)
+fin

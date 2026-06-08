@@ -1,0 +1,112 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica04Ej2
+procesos
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras((HayPapelEnLaEsquina) & (cantPapeles <> 5))
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso dejarPapeles(ES cantPapeles: numero)
+  comenzar
+    repetir 5
+      depositarPapel
+    cantPapeles:= cantPapeles - 5
+  fin
+  
+  proceso recorrerAvenida(ES cantPapeles: numero)
+  variables
+    av, caActual: numero
+  comenzar
+    av:= PosAv
+    caActual:= PosCa
+    repetir 99
+      mientras(HayPapelEnLaEsquina)
+        juntarPapeles(cantPapeles)
+        si (cantPapeles = 5)
+          BloquearEsquina(50,50)
+          Pos(50,50)
+          dejarPapeles(cantPapeles)
+          Pos(av, caActual)
+          LiberarEsquina(50,50)
+      mover
+      caActual:= caActual + 1
+    mientras(HayPapelEnLaEsquina)
+      juntarPapeles(cantPapeles)
+      si (cantPapeles = 5)
+        BloquearEsquina(50,50)
+        Pos(50,50)
+        dejarPapeles(cantPapeles)
+        Pos(av, caActual)
+        LiberarEsquina(50,50)
+  fin
+  
+  proceso accederAlmacen(ES cantPapelesTomar: numero; ES cantPapelesTomados:numero E avOrigen: numero; E caOrigen: numero; ES intentos: numero)
+  comenzar
+    cantPapelesTomados:=0
+    BloquearEsquina(50,50)
+    Pos(50,50)
+    mientras((cantPapelesTomados < cantPapelesTomar) & (HayPapelEnLaEsquina))
+      tomarPapel
+      cantPapelesTomados:= cantPapelesTomados+1
+    Pos(avOrigen, caOrigen)
+    LiberarEsquina(50,50)
+    si (cantPapelesTomados < cantPapelesTomar ) {si no junte todos}
+      intentos:= intentos + 1
+    sino
+      intentos:= 0
+  fin
+areas
+  av5: AreaP (5,1,5,100)
+  av10: AreaP (10,1,10,100)
+  posConsumidor1: AreaP (11,1,11,1)
+  posConsumidor2: AreaP (12,1,12,1)
+  almacen: AreaC (50,50,50,50)
+robots
+  robot robot1
+  variables
+    cantPapeles: numero
+  comenzar
+    cantPapeles:= 0
+    recorrerAvenida(cantPapeles)
+  fin
+  
+  robot robot2
+  variables
+    cantPapelesTomar,cantPapelesTomados: numero
+    avOrigen, caOrigen: numero
+    intentos: numero
+  comenzar
+    avOrigen:= PosAv
+    caOrigen:= PosCa
+    intentos:= 0
+    mientras (intentos < 8)
+      Random(cantPapelesTomar, 2, 5)
+      accederAlmacen(cantPapelesTomar, cantPapelesTomados, avOrigen, caOrigen, intentos)
+      repetir cantPapelesTomados {cantidad juntada}
+        depositarPapel
+  fin
+variables
+  P1: robot1
+  P2: robot1
+  C1: robot2
+  C2: robot2
+comenzar
+  AsignarArea(P1, av5)
+  AsignarArea(P1, almacen)
+  AsignarArea(P2, av10)
+  AsignarArea(P2, almacen)
+  AsignarArea(C1, posConsumidor1)
+  AsignarArea(C1, almacen)
+  AsignarArea(C2, posConsumidor2)
+  AsignarArea(C2, almacen)
+  Iniciar(P1, 5, 1)
+  Iniciar(P2, 10,1)
+  Iniciar(C1, 11,1)
+  Iniciar(C2, 12,1)
+fin

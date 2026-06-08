@@ -1,0 +1,81 @@
+programa Practica04Ej3_B
+procesos
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso unaEtapa(E cantEtapas: numero)
+  comenzar
+    repetir cantEtapas
+      juntarPapeles
+      mover
+  fin
+areas
+  av1: AreaC (1,1,1,100)
+  av2: AreaC (2,1,2,100)
+  av3: AreaC (3,1,3,100)
+  posCoordinador: AreaC (100,100,100,100)
+robots
+  robot robot1
+  variables
+    id: numero
+    termine: boolean
+  comenzar
+    termine:= V
+    RecibirMensaje(id, coordinador)
+    mientras((PosCa < 100)&())
+      unaEtapa(5)
+      si (id = 1)
+        EnviarMensaje(termine, R2)
+        EnviarMensaje(termine, R3)
+      sino
+        si (id = 2)
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R3)
+        sino
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+      repetir 2
+        RecibirMensaje(termine, *)
+    unaEtapa(4)
+      si (id = 1)
+        EnviarMensaje(termine, R2)
+        EnviarMensaje(termine, R3)
+      sino
+        si (id = 2)
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R3)
+        sino
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+      repetir 2
+        RecibirMensaje(termine, *)  
+  fin  
+  
+  robot robot2
+  variables
+    id: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    repetir 3 
+      RecibirMensaje(id, *)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, av1)
+  AsignarArea(R2, av2)
+  AsignarArea(R3, av3)
+  AsignarArea(coordinador, posCoordinador)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 2,1)
+  Iniciar(R3, 3,1)
+  Iniciar(coordinador, 100,100)
+fin

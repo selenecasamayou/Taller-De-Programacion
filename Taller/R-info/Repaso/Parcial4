@@ -1,0 +1,107 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃƒÂ³digo de ejemplo que implementa un
+proceso que recibe un nÃƒÂºmero de avenida como parÃƒÂ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial4
+procesos
+  proceso accesoFuente(E av: numero; E caActual: numero) 
+  comenzar
+    BloquearEsquina(16,16)
+    Pos(16,16)
+    tomarFlor
+    Pos(av, caActual)
+    LiberarEsquina(16,16)
+  fin
+  
+  proceso verificarEsquina(E av: numero; ES cantFlores: numero)
+  variables
+    caActual: numero
+  comenzar
+    si ~(HayFlorEnLaEsquina)
+      caActual:= PosCa
+      accesoFuente(av, caActual)
+      depositarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso recorrerAv(E av: numero; ES cantFlores: numero)
+  comenzar
+    Pos(av, 5)
+    repetir 10
+      verificarEsquina(av, cantFlores)
+      mover
+    verificarEsquina(av, cantFlores)
+  fin
+areas
+  area: AreaPC (5,5,15,15)
+  posR1: AreaC (2,12,2,12)
+  posR2: AreaC (3,12,3,12)
+  posR3: AreaC (4,12,4,12)
+  posJefe: AreaC (1,12,1,12)
+  fuente: AreaPC (16,16,16,16)
+robots
+  robot robot1
+  variables 
+    id, av: numero
+    cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, jefe)
+    EnviarMensaje(id, jefe)
+    RecibirMensaje(av, jefe)
+    mientras (av <> 16)
+      recorrerAv(av, cantFlores)
+      EnviarMensaje(id, jefe)
+      RecibirMensaje(av, jefe)
+    EnviarMensaje(cantFlores, jefe)
+  fin
+  
+  robot robot2
+  variables 
+    id, av: numero
+    cantTotal, cantJuntada: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    av:= 5
+    repetir 11
+      RecibirMensaje(id, *)
+      si (id = 1)
+        EnviarMensaje(av, R1)
+      sino
+        si (id = 2)
+          EnviarMensaje(av, R2)
+        sino
+          EnviarMensaje(av, R3)
+      av:= av + 1    
+    EnviarMensaje(16, R1)  {le avisa que termino el area}
+    EnviarMensaje(16, R2)
+    EnviarMensaje(16, R3)      
+    repetir 3
+      RecibirMensaje(cantJuntada, *)
+      cantTotal:= cantTotal + cantJuntada
+    Informar(cantTotal)
+  fin
+variables
+  R1: robot1
+  R2: robot1  
+  R3: robot1 
+  jefe: robot2 
+comenzar
+  AsignarArea(R1, posR1)
+  AsignarArea(R1, area)
+  AsignarArea(R1, fuente)
+  AsignarArea(R2, posR2)
+  AsignarArea(R2, area)
+  AsignarArea(R2, fuente)
+  AsignarArea(R3, posR3)
+  AsignarArea(R3, area)
+  AsignarArea(R3, fuente)
+  AsignarArea(jefe, posJefe)
+  Iniciar(R1, 2,12)
+  Iniciar(R2, 3,12)
+  Iniciar(R3, 4,12)  
+  Iniciar(jefe, 1,12)
+fin

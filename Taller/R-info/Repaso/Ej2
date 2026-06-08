@@ -1,0 +1,141 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Ej2  {mejor que en la practica}
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso dejarFlores(E avActual: numero; E caActual: numero; E cantFlores: numero)
+  comenzar
+    BloquearEsquina(50,50)
+    Pos(50,50)
+    repetir cantFlores
+      depositarFlor
+    Pos(avActual, caActual)
+    LiberarEsquina(50,50)
+  fin
+  
+  proceso etapa(ES avActual: numero; ES caActual: numero; ES cantFlores: numero)
+  comenzar
+    repetir 10
+      juntarFlores(cantFlores)
+      mover
+    avActual:= PosAv
+    caActual:= PosCa
+    dejarFlores(avActual, caActual, cantFlores)
+  fin
+  
+  proceso esquina50(E cantJuntada: numero)  {como el resto de robots terminaron, no es necesario que bloquee la esquina, porque no se pueden chocar}
+  comenzar
+    repetir cantJuntada
+      tomarFlor
+  fin
+areas
+  ca1: AreaP (1,1,100,1)
+  ca2: AreaP (1,2,100,2)
+  ca3: AreaP (1,3,100,3)
+  posFiscalizador: AreaP (1,4,1,4)
+  esquina: AreaC (50,50,50,50)
+robots
+  robot robot1
+  variables
+    id: numero
+    avActual, caActual: numero
+    cantFlores, cantJuntada: numero
+    termine: boolean
+  comenzar
+    cantFlores:= 0
+    cantJuntada:= 0
+    termine:= V
+    avActual:= PosAv
+    caActual:= PosCa
+    RecibirMensaje(id, fiscalizador)
+    derecha
+    repetir 9 {desde 1 hasta 91}
+      etapa(avActual, caActual, cantFlores)
+      cantJuntada:= cantJuntada + cantFlores
+      cantFlores:= 0
+      si (id = 1)
+        EnviarMensaje(termine, R2)
+        EnviarMensaje(termine, R3)
+      sino
+        si (id = 2)
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R3)
+        sino
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+      repetir 2
+        RecibirMensaje(termine, *)
+    repetir 9 {desde 91 hasta 99}
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)  {100}
+    avActual:= PosAv
+    caActual:= PosCa
+    dejarFlores(avActual, caActual, cantFlores)
+    cantJuntada:= cantJuntada + cantFlores
+    si (id = 1)
+      EnviarMensaje(termine, R2)
+      EnviarMensaje(termine, R3)
+    sino
+      si (id = 2)
+        EnviarMensaje(termine, R1)
+        EnviarMensaje(termine, R3)
+      sino
+        EnviarMensaje(termine, R1)
+        EnviarMensaje(termine, R2)
+    repetir 2
+      RecibirMensaje(termine, *)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantJuntada, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantJuntada, cantTotal: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    cantTotal:= 0
+    repetir 3
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, R1)
+      sino
+        si (id = 2)
+          RecibirMensaje(cantJuntada, R2)
+        sino
+          RecibirMensaje(cantJuntada, R3)
+      cantTotal:= cantTotal + cantJuntada
+    esquina50(cantJuntada)
+    Informar(cantJuntada)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, ca1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, ca2)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, ca3)
+  AsignarArea(R3, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  AsignarArea(fiscalizador, esquina)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 1,2)
+  Iniciar(R3, 1,3)
+  Iniciar(fiscalizador, 1,4)
+fin

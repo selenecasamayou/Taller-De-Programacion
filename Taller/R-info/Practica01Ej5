@@ -1,0 +1,132 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica01Ej5
+procesos
+  proceso juntarFlores
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+
+  proceso dejarFlores 
+  comenzar
+    mientras (HayFlorEnLaBolsa)
+      depositarFlor
+  fin
+
+  proceso recorrerAvenidas1
+  comenzar
+    repetir 14
+      juntarFlores
+      mover
+    dejarFlores
+  fin
+  
+  proceso recorrerAvenidas3
+  comenzar
+    repetir 29
+      juntarFlores
+      mover
+    dejarFlores
+  fin
+  
+  proceso juntarPapeles 
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso dejarPapeles
+  comenzar
+    mientras (HayPapelEnLaBolsa)
+      depositarPapel
+  fin
+  
+  proceso recorrerCalles2(E av: numero; E ca: numero)
+  comenzar
+    repetir 19
+      juntarPapeles
+      mover
+    juntarPapeles  
+    Pos(av,ca)
+    dejarPapeles  
+  fin
+  
+  proceso recorrerCalles4(E av: numero; E ca: numero)
+  comenzar
+    repetir 9
+      juntarPapeles
+      mover
+    juntarPapeles  
+    Pos(av,ca)
+    dejarPapeles  
+  fin
+  
+areas
+  ciudad01: AreaP (1,75,15,75)  {Se mueve en horizontal}
+  ciudad1: AreaP (1,80,15,80)
+  
+  ciudad02: AreaP (75,80,75,100)  {Se mueve en vertical}
+  ciudad2: AreaP (80,80,80,100)
+  
+  ciudad03: AreaP (70,15,100,15)  {Se mueve en horizontal}
+  ciudad3: AreaP (70,10,100,10)
+  
+  ciudad04: AreaP (10,1,10,10)  {Se mueve en vertical}
+  ciudad4: AreaP (15,1,15,10)
+robots
+  robot robot1
+  comenzar
+    derecha
+    recorrerAvenidas1
+    Pos(1,80)
+    recorrerAvenidas1
+  fin
+  
+  robot robot2
+  comenzar
+    recorrerCalles2(75,80)
+    Pos(80,80)
+    recorrerCalles2(80,80)
+  fin
+  
+  robot robot3
+  comenzar
+    derecha
+    recorrerAvenidas3
+    Pos(70,15)
+    recorrerAvenidas3
+  fin
+  
+  robot robot4
+  comenzar
+    recorrerCalles4(10,1)
+    Pos(15,1)
+    recorrerCalles4(15,1)
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  R3: robot3
+  R4: robot4
+comenzar
+  AsignarArea(R1, ciudad01)
+  AsignarArea(R1, ciudad1)
+  
+  AsignarArea(R2, ciudad02)
+  AsignarArea(R2, ciudad2)
+  
+  AsignarArea(R3, ciudad03)
+  AsignarArea(R3, ciudad3)
+  
+  AsignarArea(R4, ciudad04)
+  AsignarArea(R4, ciudad4)
+  
+  Iniciar(R1, 1,75)
+  Iniciar(R2, 75,80)
+  Iniciar(R3, 70,10)
+  Iniciar(R4, 10,1)
+fin

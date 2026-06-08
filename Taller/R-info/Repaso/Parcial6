@@ -1,0 +1,168 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial6
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso hacerEscalon(E alto: numero; E ancho: numero; ES av: numero; ES ca: numero; ES cantFlores: numero)
+  comenzar
+    repetir alto
+      juntarFlores(cantFlores)
+      mover
+    derecha
+    repetir ancho
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    av:= PosAv
+    ca:= PosCa
+  fin
+  
+  proceso irEsquina(E av: numero; E ca: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(1,5)
+    Pos(1,5)
+    depositarFlor
+    Pos(av, ca)
+    LiberarEsquina(1,5)
+  fin
+  
+  proceso depositoEsquina(E avOriginal: numero; E caOriginal: numero; E cantJuntada: numero)
+  comenzar
+    BloquearEsquina(1,5)
+    Pos(1,5)
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+    Pos(av, ca)
+    LiberarEsquina(1,5)
+  fin  
+areas
+  area: AreaPC (3,3,25,28)
+  posRA: AreaP (2,1,2,1)
+  posRB: AreaP (3,1,3,1)  
+  posJefe: AreaP (4,1,4,1)
+  esquina: AreaC (1,5,1,5)
+robots
+  robot robot1
+  variables
+    id: numero
+    alto, ancho: numero
+    av, ca: numero
+    cantFlores: numero
+  comenzar
+    Pos(3,3)
+    cantFlores:= 0
+    RecibirMensaje(id, jefe)
+    Random(alto, 2, 5)
+    Random(ancho, 2, 5)
+    hacerEscalon(alto, ancho, av, ca, cantFlores)  {primer escalon}
+    repetir cantFlores
+      irEsquina(av, ca, cantFlores)
+    EnviarMensaje(av, RB) 
+    EnviarMensaje(ca+1, RB)  {se deja una esquina vacia}
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cantFlores, jefe)
+    cantFlores:= 0
+    izquierda
+    RecibirMensaje(av, RB)  {espera para hacer el tercer escalon}
+    RecibirMensaje(ca, RB)
+    Random(alto, 2, 5)
+    Random(ancho, 2, 5)
+    hacerEscalon(alto, ancho, av, ca, cantFlores)  {tercer escalon}
+    repetir cantFlores
+      irEsquina(av, ca, cantFlores)
+    EnviarMensaje(av, RB) 
+    EnviarMensaje(ca+1, RB)  {se deja una esquina vacia}
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cantFlores, jefe)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    alto, ancho: numero
+    av, ca: numero
+    cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, jefe)
+    RecibirMensaje(av, RA)  {espera a RA para hacer el segundo escalon}
+    RecibirMensaje(ca, RA)
+    Random(alto, 2, 5)
+    Random(ancho, 2, 5)
+    hacerEscalon(alto, ancho, av, ca, cantFlores)  {segundo escalon}
+    repetir cantFlores
+      irEsquina(av, ca, cantFlores)
+    EnviarMensaje(av, RA) 
+    EnviarMensaje(ca+1, RA)  {se deja una esquina vacia}
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cantFlores, jefe)
+    cantFlores:= 0
+    izquierda
+    RecibirMensaje(av, RA)  {espera para hacer el cuarto escalon}
+    RecibirMensaje(ca, RA)
+    Random(alto, 2, 5)
+    Random(ancho, 2, 5)
+    hacerEscalon(alto, ancho, av, ca, cantFlores)  {cuarto escalon}
+    repetir cantFlores
+      irEsquina(av, ca, cantFlores)
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cantFlores, jefe)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantJuntada: numero
+    cantFloresRA, cantFloresRB: numero
+  comenzar
+    EnviarMensaje(1, RA)
+    EnviarMensaje(2, RB)
+    avOriginal:= PosAv 
+    caOriginal:= PosCa
+    repetir 4
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, RA)
+        cantFloresRA:= cantFloresRA + cantJuntada
+      sino
+        RecibirMensaje(cantJuntada, RB)
+        cantFloresRB:= cantFloresRB + cantJuntada
+      depositoEsquina(avOriginal, caOriginal, cantJuntada)  
+    si (cantFloresRA > cantFloresRB)
+      Informar(1)
+    sino
+      Informar(2)
+  fin
+variables
+  RA: robot1
+  RB: robot2
+  jefe: robot3
+comenzar
+  AsignarArea(RA, posRA)
+  AsignarArea(RA, area)
+  AsignarArea(RA, esquina)
+  AsignarArea(RB, posRB)
+  AsignarArea(RB, area)
+  AsignarArea(RB, esquina)
+  AsignarArea(jefe, posJefe)
+  AsignarArea(jefe, esquina)
+  Iniciar(RA, 2,1)
+  Iniciar(RB, 3,1)  
+  Iniciar(jefe, 4,1)
+fin

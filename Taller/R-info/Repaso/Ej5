@@ -1,0 +1,95 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Ej5  {muy mejorado}
+procesos
+  proceso agarrarPapel(ES cantPapeles: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(100,1)
+    Pos(100,1)
+    tomarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(100,1)
+    cantPapeles:= cantPapeles - 1
+  fin
+  
+  proceso dejarPapeles(E cantPapeles: numero)
+  comenzar
+    BloquearEsquina(100, 1)
+    Pos(100, 1)
+    repetir cantPapeles
+      depositarPapel
+    Pos(13,1)
+    LiberarEsquina(100, 1)
+  fin
+areas
+  posR1: AreaP (10,1,10,1)
+  posR2: AreaP (11,1,11,1)
+  posR3: AreaP (12,1,12,1)
+  posServidor: AreaP (13,1,13,1)
+  esquina: AreaC (100,1,100,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantPapeles: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, servidor)
+    repetir 4
+      EnviarMensaje(id, servidor) 
+      RecibirMensaje(cantPapeles, servidor)
+      mientras(cantPapeles < 0)
+        agarrarPapel(cantPapeles, avOriginal, caOriginal)
+        depositarPapel
+    EnviarMensaje(4, servidor) 
+  fin
+  
+  robot robot2
+  variables
+    id, intentos: numero
+    cantRobotsSinTerminar, cantPapeles: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    cantRobotsSinTerminar:= 0
+    mientras(cantRobotsSinTerminar < 3)
+      RecibirMensaje(id, *)
+      Random(cantPapeles, 1, 5)
+      si (id = 1)
+        dejarPapeles(cantPapeles)
+        EnviarMensaje(cantPapeles, R1)
+      sino 
+        si (id = 2)
+          dejarPapeles(cantPapeles)
+          EnviarMensaje(cantPapeles, R2)
+        sino
+          dejarPapeles(cantPapeles)
+          EnviarMensaje(cantPapeles, R3) 
+      si (id = 4)
+        cantRobotsSinTerminar:= cantRobotsSinTerminar + 1
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  servidor: robot2
+comenzar
+  AsignarArea(R1, posR1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, posR2)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, posR3)
+  AsignarArea(R3, esquina)
+  AsignarArea(servidor, posServidor)
+  AsignarArea(servidor, esquina)
+  Iniciar(R1, 10,1)
+  Iniciar(R2, 11,1)
+  Iniciar(R3, 12,1)
+  Iniciar(servidor, 13,1)
+fin

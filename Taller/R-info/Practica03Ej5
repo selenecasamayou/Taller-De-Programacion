@@ -1,0 +1,109 @@
+programa Practica03Ej5
+procesos
+  proceso accederFuente (E av: numero; E caActual: numero; ES cantPapeles: numero; ES hayPapel: numero)
+  comenzar
+    BloquearEsquina(11,11)
+    Pos(11,11)
+    si (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+    sino
+      hayPapel:= F
+    Pos(avActual, caActual)
+    LiberarEsquina(11,11)  
+  fin
+  
+  proceso avanzar(E av: numero; ES caActual: numero; ES cantPapeles: numero)
+  variables
+    termine: boolean
+  comenzar
+      termine:= V
+      mientras ((hayPapel) & (caActual > 100))
+        accederFuente(av, caActual, cantPapeles, hayPapel)
+        si (hayPapel)
+          depositarPapel
+          mover
+          caActual:= caActual + 1
+      si ((caActual = 100) & (hayPapel))
+        accederFuente (av, caActual, cantPapeles, hayPapel)
+        depositarPapel
+        EnviarMensaje(ternmine, coordinador)  {esto termina porque llego al final}
+      EnviarMensaje(ternmine, coordinador) {y esto porque no hay mas papeles}
+        
+  fin
+areas
+  av1: AreaP (4,1,4,100)
+  av2: AreaP (6,1,6,100)  
+  av3: AreaP (8,1,8,100)
+  av4: AreaP (10,1,10,100)
+  posCoordinador: AreaP (1,1,1,1)
+  fuente: AreaPC (11,11,11,11)
+robots
+  robot robot1
+  variables
+    id: numero
+    cantPapeles: numero
+    av, caActual: numero
+    hayPapel: boolean
+  comenzar
+    cantPapeles:= 0
+    hayPapel:= V
+    av:= PosAv
+    caActual:= PosCa
+    RecibirMensaje(id, coordinador)
+    avanzar(avActual, caActual, cantPapeles)
+    EnviarMensaje(id, coordinador)
+    EnviarMensaje(caActual, coordinador)
+  fin
+  
+  robot robot2
+  variables
+    id, caFinal: numero
+    idMasLejos, caMax: numero
+    termino: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    EnviarMensaje(4, R4)
+    caMax:= -1
+    repetir 4 
+      RecibirMensaje(termino, *)
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(caFinal, R1)
+      sino 
+        si (id = 2)
+          RecibirMensaje(caFinal, R2)
+        sino 
+          si (id = 3)
+            RecibirMensaje(caFinal, R3)
+          sino
+            RecibirMensaje(caFinal, R4) 
+      si (caFinal > caMax)
+        caMax:= caFinal
+        idMasLejos:= id
+    Informar(idMasLejos)    
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  R4: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, av1)
+  AsignarArea(R1, fuente)
+  AsignarArea(R2, av2)
+  AsignarArea(R2, fuente)
+  AsignarArea(R3, av3)
+  AsignarArea(R3, fuente)
+  AsignarArea(R4, av4)
+  AsignarArea(R4, fuente)
+  AsignarArea(coordinador, posCoordinador)
+  Iniciar(R1, 4,1)
+  Iniciar(R2, 6,1)
+  Iniciar(R3, 8,1) 
+  Iniciar(R4, 10,1)
+  Iniciar(coordinador, 1,1) 
+fin

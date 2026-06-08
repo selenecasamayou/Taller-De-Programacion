@@ -1,0 +1,160 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial03
+procesos
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerCalle(E cantMovimientos: numero; ES cantPapeles: numero)
+  comenzar
+    repetir cantMovimientos-1
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso accederEsquina(E cantPapeles: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    repetir cantPapeles
+      BloquearEsquina(3,20)
+      Pos(3,20)
+      depositarPapel
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(3,20)
+  fin
+  
+  proceso irEsquina(E cantJuntadaTotal: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    {BloquearEsquina(3,20) no hace falta bloquear porque nadie más que el va a ir a la esquina}
+    Pos(3,20)
+    repetir cantJuntadaTotal
+      tomarPapel
+    Pos(avOriginal, caOriginal)
+    {LiberarEsquina(3,20)}
+  fin
+  
+  proceso minimo(E id: numero; E cantJuntada: numero; ES idMin: numero; ES cantJuntadaMin: numero)
+  comenzar
+    si (cantJuntada < cantJuntadaMin)
+      cantJuntadaMin:= cantJuntada
+      idMin:= id
+  fin
+areas
+  area1: AreaP (1,2,20,2)
+  area2: AreaP (21,2,41,2)
+  area3: AreaP (42,2,63,2)
+  posJefe: AreaP (2,1,2,1)  
+  esquina: AreaPC (3,20,3,20)
+robots
+  robot robot1
+  variables
+    id: numero
+    cantMovimientos, cantPapeles: numero
+    avOriginal, caOriginal: numero
+    termine, minimo: boolean
+    cantJuntadaTotal: numero
+  comenzar
+    derecha
+    cantPapeles:= 0
+    termine:= V
+    RecibirMensaje(id, jefe)
+    si (id = 1)
+      recorrerCalle(20, cantPapeles)
+      EnviarMensaje(termine, R2)
+      avOriginal:= PosAv
+      caOriginal:= PosCa
+      EnviarMensaje(id, jefe)
+      EnviarMensaje(cantPapeles, jefe)
+      accederEsquina(cantPapeles, avOriginal, caOriginal)
+    sino
+      si (id = 2)
+        RecibirMensaje(termine, R1)
+        recorrerCalle(21, cantPapeles)
+        EnviarMensaje(termine, R3)
+        avOriginal:= PosAv
+        caOriginal:= PosCa
+        EnviarMensaje(id, jefe)
+        EnviarMensaje(cantPapeles, jefe)
+        accederEsquina(cantPapeles, avOriginal, caOriginal)
+      sino
+        RecibirMensaje(termine, R2)
+        recorrerCalle(22, cantPapeles)
+        avOriginal:= PosAv
+        caOriginal:= PosCa
+        EnviarMensaje(id, jefe)
+        EnviarMensaje(cantPapeles, jefe)
+        accederEsquina(cantPapeles, avOriginal, caOriginal)
+    EnviarMensaje(4, jefe)
+    RecibirMensaje(minimo, jefe)
+    si (minimo)
+      RecibirMensaje(cantJuntadaTotal, jefe)
+      irEsquina(cantJuntadaTotal, avOriginal, caOriginal)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantJuntada, cantJuntadaTotal, robTerminados: numero
+    idMin, cantJuntadaMin: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    cantJuntadaMin:= 10000
+    cantJuntadaTotal:= 0
+    mientras (robTerminados < 3)
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, R1)
+      sino
+        si (id = 2)
+          RecibirMensaje(cantJuntada, R2)
+        sino
+          si (id = 3)
+            RecibirMensaje(cantJuntada, R3)
+          sino  {recibe 4 porque termino un robot}
+            robTerminados:= robTerminados + 1
+      cantJuntadaTotal:= cantJuntadaTotal + cantJuntada
+      minimo(id, cantJuntada, idMin, cantJuntadaMin)
+    si (idMin = 1)
+      EnviarMensaje(V, R1)
+      EnviarMensaje(cantJuntadaTotal, R1)
+      EnviarMensaje(F, R2)
+      EnviarMensaje(F, R3)
+    sino
+      si (idMin = 2)
+        EnviarMensaje(V, R2)
+        EnviarMensaje(cantJuntadaTotal, R2)
+        EnviarMensaje(F, R1)
+        EnviarMensaje(F, R3)
+      sino
+        EnviarMensaje(V, R3)
+        EnviarMensaje(cantJuntadaTotal, R3)
+        EnviarMensaje(F, R1)
+        EnviarMensaje(F, R2)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  jefe: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, area3)
+  AsignarArea(R3, esquina)
+  AsignarArea(jefe, posJefe)
+  Iniciar(R1, 1,2)
+  Iniciar(R2, 21,2)
+  Iniciar(R3, 42,2)
+  Iniciar(jefe, 2,1)
+fin

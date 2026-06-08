@@ -1,0 +1,110 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica03Ej4_A
+procesos
+  proceso moverFlor(E avOriginal: numero; E caOriginal: numero; ES hayFlores: boolean)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      BloquearEsquina(11,11)
+      Pos(11,11)
+      LiberarEsquina(10,10)
+      depositarFlor
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(11,11)
+    sino
+      hayFlores:= F
+  fin
+
+  proceso accederEsquina(E avOriginal: numero; E caOriginal: numero; ES hayFlores: boolean)
+  comenzar
+    mientras(hayFlores)
+      moverFlor(avOriginal, caOriginal, hayFlores)
+  fin
+  
+  proceso recolectarFlores
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+areas
+  pos1: AreaP (9,9,9,9)
+  pos2: AreaP (9,10,9,10)
+  pos3: AreaP (9,11,9,11)  
+  pos4: AreaP (9,12,9,12)
+  posCoordinador: AreaP (1,1,1,1)
+  esquina1: AreaPC (10,10,10,10)
+  esquina2: AreaC (11,11,11,11) 
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    hayFlores: boolean
+  comenzar
+    hayFlores:= V
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, coordinador)
+    accederEsquina(avOriginal, caOriginal, hayFlores)
+    EnviarMensaje(id, coordinador)
+    EnviarMensaje(hayFlores, coordinador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    hayFlores: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    EnviarMensaje(4, R4)
+    repetir 4
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(hayFlores, R1) {preguntar si importa o hago repetir 4 con los 2}
+      sino
+        si (id = 2)
+          RecibirMensaje(hayFlores, R2)
+        sino
+          si (id = 3)
+            RecibirMensaje(hayFlores, R3)
+          sino
+            RecibirMensaje(hayFlores, R4)
+    Informar(id)
+    Pos(11,11)
+    recolectarFlores
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  R4: robot1
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, pos1)
+  AsignarArea(R1, esquina1)
+  AsignarArea(R1, esquina2)
+  AsignarArea(R2, pos2)
+  AsignarArea(R2, esquina1)
+  AsignarArea(R2, esquina2)
+  AsignarArea(R3, pos3)
+  AsignarArea(R3, esquina1)
+  AsignarArea(R3, esquina2)
+  AsignarArea(R4, pos4)
+  AsignarArea(R4, esquina1)
+  AsignarArea(R4, esquina2)
+  AsignarArea(coordinador, esquina1)
+  AsignarArea(coordinador, esquina2)
+  Iniciar(R1, 9,9)
+  Iniciar(R2, 9,10)
+  Iniciar(R3, 9,11)
+  Iniciar(R4, 9,12)
+  Iniciar(coordinador, 1,1)
+fin

@@ -1,0 +1,135 @@
+programa Practica05Ej2
+procesos
+  proceso juntarFloresYJuntarPapeles(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso depositar(E avActual: numero; E caActual: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(50,50)
+    Pos(50,50)
+    repetir cantFlores
+      depositarFlor
+      cantFlores:= cantFlores - 1
+    Pos(avActual, caActual)
+    LiberarEsquina(50,50)
+  fin
+  
+  proceso unaEtapa(ES avActual: numero; ES caActual: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 10
+      juntarFloresYJuntarPapeles(cantFlores, cantPapeles)
+      mover
+    avActual:= PosAv
+    caActual:= PosCa
+    depositar(avActual, caActual, cantFlores)
+  fin
+  
+  proceso esquina50(ES cantTotalFlores: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(50,50)
+    Pos(50,50)
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantTotalFlores:= cantTotalFlores + 1
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(50,50)
+  fin
+areas
+  calle1: AreaP (1,1,100,1)
+  calle2: AreaP (1,2,100,2)
+  calle3: AreaP (1,3,100,3)
+  posFiscalizador: AreaP (1,4,1,4)
+  esquina: AreaC (50,50,50,50)
+robots
+  robot robot1
+  variables
+    id: numero
+    avActual, caActual: numero
+    cantFlores, cantPapeles: numero
+    termine: boolean
+  comenzar
+    avActual:= PosAv
+    caActual:= PosCa
+    cantFlores:= 0
+    cantPapeles:= 0
+    termine:= V
+    RecibirMensaje(id, fiscalizador)
+    derecha
+    repetir 9   {1-90; se queda posicionado en la 91}
+      unaEtapa(avActual, caActual, cantFlores, cantPapeles)
+      si (id = 1)
+        EnviarMensaje(termine, R2)
+        EnviarMensaje(termine, R3)
+      sino
+        si (id = 2)
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R3)
+        sino
+          EnviarMensaje(termine, R1)
+          EnviarMensaje(termine, R2)
+      repetir 2
+        RecibirMensaje(termine, *)
+    repetir 9 {91-99; se queda posicionado en la 100}
+      juntarFloresYJuntarPapeles(cantFlores, cantPapeles)
+      mover
+    juntarFloresYJuntarPapeles(cantFlores, cantPapeles) {esquina 100}
+    avActual:= PosAv
+    caActual:= PosCa
+    depositar(avActual, caActual, cantFlores)
+    si (id = 1)
+      EnviarMensaje(termine, R2)
+      EnviarMensaje(termine, R3)
+    sino
+      si (id = 2)
+        EnviarMensaje(termine, R1)
+        EnviarMensaje(termine, R3)
+      sino
+        EnviarMensaje(termine, R1)
+        EnviarMensaje(termine, R2)
+    repetir 2
+      RecibirMensaje(termine, *)
+    EnviarMensaje(termine, fiscalizador)
+  fin
+  robot robot2
+  variables
+    id: numero
+    cantTotalFlores, avOriginal, caOriginal: numero
+    termino: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)   
+    cantTotalFlores:= 0
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    repetir 3
+      RecibirMensaje(termino, *)
+    esquina50(cantTotalFlores, avOriginal, caOriginal)
+    Informar(cantTotalFlores)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, esquina)
+  AsignarArea(R1, calle1)
+  AsignarArea(R2, esquina)
+  AsignarArea(R2, calle2)
+  AsignarArea(R3, esquina)
+  AsignarArea(R3, calle3)
+  AsignarArea(fiscalizador, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 1,2)
+  Iniciar(R3, 1,3)
+  Iniciar(fiscalizador, 1,4)
+fin

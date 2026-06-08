@@ -1,0 +1,231 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica03Ej6_A
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso ladoSinChoque1(ES cantFlores: numero)
+  comenzar
+    repetir 6
+      juntarFlores(cantFlores)
+      mover
+    derecha
+  fin
+  
+  proceso ladoConChoque(E av: numero; E ca: numero; ES cantFlores: numero)
+  comenzar
+    repetir 2
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    BloquearEsquina(av, ca)
+    mover
+    juntarFlores(cantFlores)
+    mover
+    LiberarEsquina(av, ca)
+    repetir 2
+      juntarFlores(cantFlores)
+      mover
+    derecha
+  fin
+  
+  proceso recorrerCuadrante1(ES cantFlores: numero)
+  variables
+    av, ca: numero
+  comenzar
+    ladoSinChoque1(cantFlores)
+    ladoConChoque(8, 5, cantFlores)
+    ladoConChoque(5, 8, cantFlores)
+    ladoSinChoque1(cantFlores)
+  fin
+  
+  proceso ladoSinChoque2(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 10
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    derecha
+  fin
+  
+  proceso ladoConChoque1(E av: numero; E ca: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 2
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    BloquearEsquina(av, ca)
+    mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    mover
+    LiberarEsquina(av, ca)
+    repetir 6
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    derecha
+  fin
+  
+  proceso ladoConChoque2(E av: numero; E ca: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 6
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    BloquearEsquina(av, ca)
+    mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    mover
+    LiberarEsquina(av, ca)
+    repetir 2
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    derecha
+  fin
+  
+  proceso recorrerCuadrante2(ES cantFlores: numero; ES cantPapeles: numero)
+  variables
+    av, ca: numero
+  comenzar
+    ladoConChoque1(8, 5, cantFlores, cantPapeles)
+    ladoSinChoque2(cantFlores, cantPapeles)
+    ladoSinChoque2(cantFlores, cantPapeles)
+    ladoConChoque2(5, 8, cantFlores, cantPapeles)
+  fin
+  
+  proceso recorrerCalle1(ES cantFlores: numero)
+  variables
+    avActual: numero
+  comenzar
+    derecha
+    avActual:= 1
+    mientras ((cantFlores > 0) & (avActual < 100))
+      depositarFlor
+      cantFlores:= cantFlores - 1
+      avActual:= avActual + 1
+      mover
+    si ((avActual = 100) & (cantFlores > 0))
+      depositarFlor
+      cantFlores:= cantFlores - 1
+  fin
+  
+  proceso dejarFlorYPapel(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    depositarFlor
+    cantFlores:= cantFlores - 1
+    depositarPapel
+    cantPapeles:= cantPapeles - 1
+  fin
+  
+  proceso recorrerCalle2(ES cantFlores: numero; ES cantPapeles: numero)
+  variables
+    avActual: numero
+  comenzar
+    derecha
+    avActual:= 1
+    mientras ((cantFlores > 0) & (cantPapeles > 0) & (avActual < 100))
+      dejarFlorYPapel(cantFlores, cantPapeles)
+      avActual:= avActual + 1
+      mover
+    si ((avActual = 100) & (cantFlores > 0) & (cantPapeles > 0))
+      dejarFlorYPapel(cantFlores, cantPapeles)
+  fin
+areas
+  area: AreaPC (2,2,15,15)
+  calle: AreaPC (1,20,100,21)
+  posFiscalizador: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    id, calle: numero
+    cantFlores: numero
+    termine: boolean
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerCuadrante1(cantFlores)
+    EnviarMensaje(termine, fiscalizador)
+    EnviarMensaje(id, fiscalizador)
+    {////////////////////////////////}
+    RecibirMensaje(calle, fiscalizador)
+    Pos(1, calle)
+    recorrerCalle1(cantFlores)
+  fin
+  
+  robot robot2
+  variables
+    id, calle: numero
+    cantFlores, cantPapeles: numero
+    termine: boolean
+  comenzar
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerCuadrante2(cantFlores, cantPapeles)
+    EnviarMensaje(termine, fiscalizador)
+    EnviarMensaje(id, fiscalizador)
+    {////////////////////////////////}
+    RecibirMensaje(calle, fiscalizador)
+    Pos(1, calle)
+    recorrerCalle2(cantFlores, cantPapeles)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    calle: numero
+    termino: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    RecibirMensaje(termino, *)
+    RecibirMensaje(id, *)
+    calle:= 20
+    si (id = 1)
+      EnviarMensaje(calle, R1)
+    sino  
+      EnviarMensaje(calle, R2)
+    RecibirMensaje(termino, *) {preguntar si siempre es necesario avisar que termino asi o se puede mandar solamente el id o por ej la cant de papeles}
+    RecibirMensaje(id, *)
+    calle:= 21
+    si (id = 1)
+      EnviarMensaje(calle, R1)
+    sino  
+      EnviarMensaje(calle, R2)
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, area)  
+  AsignarArea(R1, calle)
+  AsignarArea(R2, area)
+  AsignarArea(R2, calle)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 2,2)
+  Iniciar(R2, 5,5)  
+  Iniciar(fiscalizador, 1,1)
+fin

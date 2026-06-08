@@ -1,0 +1,154 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial09
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+
+  proceso hacerLado(E tamCuadrado: numero; ES cantFlores: numero)
+  comenzar
+    repetir tamCuadrado-1 {es el tam por lado, pero como son los mismos lados la llame así}
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    derecha
+  fin
+
+  proceso hacerCuadrado(ES posCuadradoSig: numero; E tamCuadrado: numero; ES cantFlores: numero)
+  comenzar
+    hacerLado(tamCuadrado, cantFlores)
+    posCuadradoSig:= PosCa + 1 {esto es para dejar una esquina entre cuadrados como se muestra en el dibujo, la guardo despues de hacer el primer lado}
+    repetir 3
+      hacerLado(tamCuadrado, cantFlores)
+  fin
+  
+  proceso dejarFlores(E cantFlores: numero; E av: numero; E caOriginal: numero)
+  comenzar
+    repetir cantFlores
+      BloquearEsquina(50,50)
+      Pos(50,50)
+      depositarFlor
+      Pos(av, caOriginal)
+      LiberarEsquina(50,50)
+  fin
+  
+  
+  proceso juntarTodo(E cantAJuntar: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(50,50)
+    Pos(50,50)
+    repetir cantAJuntar
+      tomarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(50,50)
+  fin
+  
+  proceso maximo(ES idMax: numero; E cantR1: numero; E cantR2: numero; E cantR3: numero)
+  comenzar
+    si ((cantR1 > cantR2) & (cantR1 > cantR3))
+      idMax:= 1
+    sino
+      si ((cantR2 > cantR1) & (cantR2 > cantR3))
+        idMax:= 2
+      sino
+        idMax:= 3
+  fin
+areas
+  area1: AreaP (1,1,7,21)  {caso maximo conde todos los cuadrados son de 6}
+  area2: AreaP (10,1,16,21)  {lo mismo}
+  area3: AreaP (20,1,26,21)  {lo mismo}
+  posCoordinador: AreaP (100,100,100,100)
+  esquina: AreaC (50,50,50,50)
+robots
+  robot robot1
+  variables
+    id, tamCuadrado: numero
+    av, caOriginal: numero
+    posCuadradoSig, cantFlores: numero
+  comenzar
+    av:= PosAv
+    caOriginal:= PosCa
+    cantFlores:= 0
+    posCuadradoSig:= 0
+    RecibirMensaje(id, coordinador)
+    repetir 2
+      RecibirMensaje(tamCuadrado, coordinador)
+      hacerCuadrado(posCuadradoSig, tamCuadrado, cantFlores)
+      caOriginal:= PosCa {la uso para volver a mi cuadrado actual,antes de empezar el siguiente}
+      dejarFlores(cantFlores, av, caOriginal)
+      EnviarMensaje(id, coordinador)  {le avisa que termino un cuadrado}
+      EnviarMensaje(cantFlores, coordinador)
+      cantFlores:= 0 {reinicio}
+      Pos(av, posCuadradoSig) {la uso SOLO para posicionarme en el siguiente}
+    RecibirMensaje(tamCuadrado, coordinador)
+    hacerCuadrado(posCuadradoSig, tamCuadrado, cantFlores)  {ultimo}
+    caOriginal:= PosCa
+    dejarFlores(cantFlores, av, caOriginal)
+    EnviarMensaje(id, coordinador)  
+    EnviarMensaje(cantFlores, coordinador)
+  fin
+  
+  robot robot2
+  variables
+    id, tamCuadrado: numero
+    avOriginal, caOriginal: numero
+    cantAJuntar, cantR1, cantR2, cantR3: numero
+    idMax: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    cantR1:= 0
+    cantR2:= 0
+    cantR3:= 0
+    repetir 3
+      Random(tamCuadrado, 1, 6)
+      EnviarMensaje(tamCuadrado, R1)
+      Random(tamCuadrado, 1, 6)
+      EnviarMensaje(tamCuadrado, R2)
+      Random(tamCuadrado, 1, 6)
+      EnviarMensaje(tamCuadrado, R3)
+      repetir 3
+        RecibirMensaje(id, *)
+        si (id = 1)
+          RecibirMensaje(cantAJuntar, R1)
+          cantR1:= cantR1 + cantAJuntar 
+        sino
+          si (id = 2)
+            RecibirMensaje(cantAJuntar, R2)
+            cantR2:= cantR2 + cantAJuntar 
+          sino
+            RecibirMensaje(cantAJuntar, R3)
+            cantR3:= cantR3 + cantAJuntar 
+        juntarTodo(cantAJuntar, avOriginal, caOriginal)
+    maximo(idMax, cantR1, cantR2, cantR3)
+    Informar(idMax)
+  fin
+variables
+  R1: robot1
+  R2: robot1  
+  R3: robot1  
+  coordinador: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, area3)
+  AsignarArea(R3, esquina)
+  AsignarArea(coordinador, posCoordinador)
+  AsignarArea(coordinador, esquina)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 10,1)
+  Iniciar(R3, 20,1)
+  Iniciar(coordinador, 100,100)
+fin

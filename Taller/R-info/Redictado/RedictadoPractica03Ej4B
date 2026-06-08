@@ -1,0 +1,95 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica03Ej4B
+procesos
+  proceso dejarFlor(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(11,11)
+    Pos(11,11)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(11,11)
+  fin
+  
+  proceso accederEsquina(E avOriginal: numero; E caOriginal: numero; ES hayFlor: boolean)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    si (HayFlorEnLaEsquina)
+      tomarFlor  { accion 1}
+    sino { lo pongo en falso y me voy }
+      hayFlor:= F   
+    Pos(avOriginal, caOriginal) 
+    LiberarEsquina(10,10)  
+  fin  
+areas 
+  posInicial1: AreaP (9,9,9,9) 
+  posInicial2: AreaP (9,10,9,10) 
+  posInicial3: AreaP (9,11,9,11) 
+  posInicial4: AreaP (9,12,9,12) 
+  posCoord: AreaP (1,1,1,1) 
+  esqF: AreaPC (10,10,10,10) 
+  esqR: AreaC (11,11,11,11) 
+robots 
+  robot robot1 
+  variables  
+    id: numero 
+    avOriginal, caOriginal: numero  
+    hayFlor: boolean 
+  comenzar 
+    avOriginal:= PosAv 
+    caOriginal:= PosCa 
+    hayFlor:= V 
+    RecibirMensaje(id, coordinador) 
+    mientras (hayFlor) 
+      accederEsquina(avOriginal, caOriginal, hayFlor) 
+      si (hayFlor)
+        dejarFlor(avOriginal, caOriginal)
+    EnviarMensaje(coordinador, id)  { le avisa que termino }
+  fin 
+  
+  robot robot2 
+  variables 
+    id: numero 
+  comenzar 
+    EnviarMensaje(1, R1) 
+    EnviarMensaje(2, R2) 
+    EnviarMensaje(3, R3)     
+    EnviarMensaje(4, R4) 
+    repetir 4 
+      RecibirMensaje(id, *) 
+    Inforar(id)  { como solo me importa el ultimo, el resto no afectan }
+    Pos(11,11)  { como ya finalizo el resto, no hace falta bloquear }
+    mientras (HayFlorEnLaEsquina) 
+      tomarFlor 
+  fin 
+variables 
+  R1: robot1 
+  R2: robot1 
+  R3: robot1 
+  R4: robot1 
+  coordinador: robot2 
+comenzar 
+  AsignarArea(R1, posInicial1) 
+  AsignarArea(R1, esqF)  
+  AsignarArea(R1, esqR)  
+  AsignarArea(R2, posInicial2) 
+  AsignarArea(R2, esqF)  
+  AsignarArea(R2, esqR) 
+  AsignarArea(R3, posInicial3) 
+  AsignarArea(R3, esqF) 
+  AsignarArea(R3, esqR)  
+  AsignarArea(R4, posInicial4) 
+  AsignarArea(R4, esqF)   
+  AsignarArea(R4, esqR)  
+  AsignarArea(coordinador, posCoord) 
+  AsignarArea(coordinador, esqR) 
+  Iniciar(R1, 9,9) 
+  Iniciar(R2, 9,10)  
+  Iniciar(R3, 9,11) 
+  Iniciar(R4, 9,12) 
+  Iniciar(coordinador, 1,1) 
+fin 

@@ -1,0 +1,158 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica03Ej2
+procesos
+  proceso izquierda 
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso hacerEscalonCentro1(E id: numero; ES cantFlores: numero)
+  comenzar
+    mover
+    juntarFlores(cantFlores)
+    derecha  {hace ultimo vertice}
+    BloquearEsquina(16, 16)
+    mover
+    EnviarMensaje(id, jefe) {envia si llego primero}
+    repetir 2
+      derecha
+    mover {vuelve donde estaba antes}
+    LiberarEsquina(16, 16)
+  fin
+  
+  proceso hacerEscalon1(E escalon: numero; ES cantFlores: numero)
+  comenzar
+    repetir escalon
+      mover
+    juntarFlores(cantFlores)
+    derecha
+    repetir escalon
+      mover
+    juntarFlores(cantFlores)
+    izquierda
+  fin
+  
+  proceso recorrerEscalones1(E id: numero; ES cantFlores: numero)
+  variables
+    escalon: numero
+  comenzar
+    escalon:= 5
+    repetir 4  
+      hacerEscalon1(escalon, cantFlores)
+      escalon:= escalon - 1
+    hacerEscalonCentro1(id, cantFlores)  {aca hago el ultimo escalon antes del centro}
+    escalon:= 2
+    repetir 4
+      hacerEscalon1(escalon, cantFlores)
+      escalon:= escalon + 1
+  fin
+  
+  proceso hacerEscalonCentro2(E id: numero; ES cantPapeles: numero)
+  comenzar
+    mover
+    juntarPapeles(cantPapeles)
+    izquierda  {hace ultimo vertice} 
+    BloquearEsquina(16, 16)
+    mover
+    EnviarMensaje(id, jefe) {envia si llego primero}
+    repetir 2 
+      derecha
+    mover {vuelve donde estaba antes}
+    LiberarEsquina(16, 16)
+  fin
+  
+  proceso hacerEscalon2(E escalon: numero; ES cantPapeles: numero)
+  comenzar
+    repetir escalon
+      mover
+    juntarPapeles(cantPapeles)
+    izquierda
+    repetir escalon
+      mover
+    juntarPapeles(cantPapeles)
+    derecha
+  fin
+  
+  proceso recorrerEscalones2(E id: numero; ES cantPapeles: numero)
+  variables
+    escalon: numero
+  comenzar
+    escalon:= 5
+    repetir 4  
+      hacerEscalon2(escalon, cantPapeles)
+      escalon:= escalon - 1
+    hacerEscalonCentro2(id, cantPapeles)  {aca hago el ultimo escalon antes del centro}
+    escalon:= 2
+    repetir 4
+      hacerEscalon2(escalon, cantPapeles)
+      escalon:= escalon + 1
+  fin
+  
+areas
+  area1: AreaPC (1,1,15,30)
+  area2: AreaP (17,1,31,30)
+  centro: AreaPC (16,16,16,16)
+robots
+  robot robot1
+  variables
+    id, cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, jefe)
+    recorrerEscalones1(id, cantFlores)
+    Informar(cantFlores)
+  fin
+  
+  robot robot2
+  variables
+    id, cantPapeles: numero
+  comenzar
+    cantPapeles:= 0
+    RecibirMensaje(id, jefe)
+    recorrerEscalones2(id, cantPapeles)
+    Informar(cantPapeles)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    RecibirMensaje(id, *) {ganador}
+    Informar(id)
+    RecibirMensaje(id, *) {perdedor}
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  jefe: robot3
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, centro)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, centro)
+  AsignarArea(jefe, area1)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 31,1)
+  Iniciar(jefe, 15,1)
+fin

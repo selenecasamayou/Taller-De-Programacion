@@ -1,0 +1,188 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoParcial13
+procesos
+  proceso girar
+  comenzar
+    repetir 2
+      derecha
+  fin
+  
+  proceso vaciarBolsa
+  comenzar
+    mientras(HayFlorEnLaBolsa)
+      depositarFlor
+    mientras(HayPapelEnLaBolsa)
+      depositarPapel
+  fin
+  
+  proceso verFlor(ES cantFlores: numero)
+  comenzar
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso recorrido(ES cantFlores: numero)
+  comenzar
+    repetir 18  {2 a 20}
+      verFlor(cantFlores)
+      mover
+    verFlor(cantFlores)
+  fin
+  
+  proceso depositar(E caOriginal: numero)
+  comenzar
+    BloquearEsquina(1, 6)
+    Pos(1, 6)
+    depositarFlor
+    Pos(20, caOriginal)
+    LiberarEsquina(1, 6)
+  fin
+  
+  proceso clasificacion(E caOriginal: numero; ES cantFlores: numero)
+  comenzar
+    recorrido(cantFlores)
+    repetir cantFlores
+      depositar(caOriginal)
+  fin
+  
+  proceso verPapel(ES cantPapeles: numero)
+  comenzar
+    si (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrido2(ES cantPapeles: numero)
+  comenzar
+    repetir 18  {20 a 2}
+      verFlor(cantPapeles)
+      mover
+    verFlor(cantPapeles)
+  fin
+  
+  proceso depositar2(E caOriginal: numero)
+  comenzar
+    BloquearEsquina(1, 6)
+    Pos(1, 6)
+    depositarPapel
+    Pos(2, caOriginal)
+    LiberarEsquina(1, 6)
+  fin
+  
+  proceso final(E caOriginal: numero; ES cantPapeles: numero)
+  comenzar
+    recorrido2(cantPapeles)
+    repetir cantPapeles
+      depositar2(caOriginal)
+  fin
+areas
+  area1: AreaP (1,1,20,1)
+  area2: AreaP (1,2,20,2)  
+  area3: AreaP (1,3,20,3)
+  area4: AreaP (1,4,20,4)
+  posFiscalizador: AreaP (1,5,1,5)
+  esquina: AreaPC (1,6,1,6)
+robots
+  robot robot1
+  variables
+    id: numero
+    caOriginal: numero
+    cantFlores, cantPapeles: numero
+    seguir: boolean
+  comenzar
+    vaciarBolsa
+    caOriginal:= PosCa
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    derecha
+    mover   {porque arrancan desde la avenida 2}
+    clasificacion(caOriginal, cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    RecibirMensaje(seguir, fiscalizador)  {esto es para saber si clasifico}
+    si (seguir)   {segunda etapa}
+      girar                                   
+      cantPapeles:= 0
+      final(caOriginal, cantPapeles)
+      EnviarMensaje(id, fiscalizador)
+  fin
+  
+  robot robot5
+  variables
+    id, idFin1, idFin2, idGanador: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    EnviarMensaje(4, R4)
+    RecibirMensaje(id, *)  {primero en llegar}
+    si (id=1)
+      idFin1:=id
+    sino
+      si (id=2)
+        idFin1:=id
+      sino       
+        si (id=3)
+          idFin1:=id
+        sino
+          idFin1:=id
+    RecibirMensaje(id,*)  {segundo en llegar}
+    si (id=1)
+      idFin2:=id
+    sino
+      si (id=2)
+        idFin2:=id
+      sino       
+        si (id=3)
+          idFin2:=id
+        sino
+          idFin2:=id
+    repetir 2
+      RecibirMensaje(id,*)  {no me importan, tercer y cuarto puesto}
+    si ((idFin1=1)|(idFin2=1))
+      EnviarMensaje(V,R1)
+    sino
+      EnviarMensaje(F,R1)
+    si ((idFin1=2)|(idFin2=2))
+      EnviarMensaje(V,R2)
+    sino
+      EnviarMensaje(F,R2)
+    si ((idFin1=3)|(idFin2=3))
+      EnviarMensaje(V,R3)
+    sino
+      EnviarMensaje(F,R3)
+    si ((idFin1=4)|(idFin2=4))
+      EnviarMensaje(V,R4)
+    sino
+      EnviarMensaje(F,R4)
+    {////////////////////////}
+    RecibirMensaje(idGanador, *)  {ganador}
+    RecibirMensaje(id, *)  {segundo lugar}
+    Informar(idGanador)
+  fin
+variables
+  R1: robot1
+  R2: robot1  {cada robot es de un tipo diferente por si es finalista}
+  R3: robot1
+  R4: robot1
+  fiscalizador: robot5
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, esquina)  
+  AsignarArea(R3, area3)
+  AsignarArea(R3, esquina)
+  AsignarArea(R4, area4)
+  AsignarArea(R4, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 1,2)
+  Iniciar(R3, 1,3)
+  Iniciar(R4, 1,4)
+  Iniciar(fiscalizador, 1,5)
+fin

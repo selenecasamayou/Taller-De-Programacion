@@ -1,0 +1,125 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial10
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso esquinaChoque(E id: numero; E calle: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(6, calle)
+    mover
+    EnviarMensaje(id, fiscalizador)  {llego, y despues el fiscalizador se fija quien se la mando primero}
+    juntarFlores(cantFlores)  {6}
+    mover
+    LiberarEsquina(6, calle)
+  fin
+  
+  proceso avanzarCalle(E calle: numero; ES cantFlores: numero; E id: numero)
+  comenzar
+    Pos(1, calle)
+    derecha
+    repetir 4 
+      juntarFlores(cantFlores) {desde 1 a 4}
+      mover
+    juntarFlores(cantFlores)  {5}
+    esquinaChoque(id, calle, cantFlores)
+    repetir 55 
+      juntarFlores(cantFlores) {desde 7 a 60}
+      mover
+    juntarFlores(cantFlores)  {61}
+  fin
+  
+  proceso avanzarAvenida(ES cantFlores: numero; E calle: numero; E id: numero)
+  comenzar
+    repetir calle-2  {en calle esta el numero de donde choca, entonces hago calle-2 para quedarme en la anterior al choque, si esta en la 7, hace repetir 5 y queda en la 6}
+      juntarFlores(cantFlores) {desde 1 a calle-2}
+      mover
+    juntarFlores(cantFlores)  {calle-1}
+    esquinaChoque(id, calle, cantFlores)
+    repetir 60-calle  {61-1 es la ultima calle} 
+      juntarFlores(cantFlores) {desde calle a 60}
+      mover
+    juntarFlores(cantFlores)  {61}
+  fin
+  
+areas
+  areaF02: AreaP (1,2,5,50)  {antes}
+  areaF2: AreaP (7,2,62,50)  {despues}
+  choques: AreaPC (6,2,6,50)  
+  areaF01: AreaP (6,1,6,1)  {antes}
+  areaF1: AreaP (6,51,6,61)  {despues}
+  posFiscalizador: AreaP (100,100,100,100)
+robots
+  robot robot1
+  variables
+    id: numero
+    calle, cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    RecibirMensaje(calle, fiscalizador)
+    avanzarAvenida(cantFlores, calle, id)
+    EnviarMensaje(cantFlores, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    calle, cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    RecibirMensaje(calle, fiscalizador)
+    avanzarCalle(calle, cantFlores, id)
+    EnviarMensaje(cantFlores, fiscalizador)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    calleX, cantJuntada, ganador, cantGanador: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(1, R2)
+    Random(calleX, 2, 50)
+    EnviarMensaje(calleX, R2)
+    EnviarMensaje(calleX, R1)  {para saber en que esquina se choca y no ir bloqueando todas}
+    RecibirMensaje(id, *)
+    si (id = 1)
+      ganador:= 1
+      RecibirMensaje(cantJuntada, R1)
+      cantGanador:= cantJuntada
+    sino
+      ganador:= 2
+      RecibirMensaje(cantJuntada, R2)
+    cantGanador:= cantJuntada
+    Informar(cantJuntada)
+    RecibirMensaje(id, *)  {como es el perdedor, no me importa}
+    RecibirMensaje(cantJuntada, *) 
+    Informar(ganador)
+    Informar(cantGanador)
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, areaF01)
+  AsignarArea(R1, choques)
+  AsignarArea(R1, areaF1)
+  AsignarArea(R2, areaF02)  
+  AsignarArea(R2, choques)  
+  AsignarArea(R2, areaF2)  
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 6,1)
+  Iniciar(R2, 1,2)
+  Iniciar(fiscalizador, 100,100)
+fin

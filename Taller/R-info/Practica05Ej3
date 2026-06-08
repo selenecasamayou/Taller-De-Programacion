@@ -1,0 +1,101 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃƒÂ³digo de ejemplo que implementa un
+proceso que recibe un nÃƒÂºmero de avenida como parÃƒÂ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica05Ej3
+procesos
+  proceso verSiHayFlor(ES cantFlores: numero; ES cantEsquinas: numero)
+  comenzar
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+    sino
+      cantEsquinas:= cantEsquinas + 1
+  fin 
+  
+  proceso deposito(E avActual: numero; E ca: numero; E cantFlores: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    repetir cantFlores
+      depositarFlor
+    Pos(avActual, ca)
+    LiberarEsquina(10,10)
+  fin
+  
+  proceso recorrerCalle(E ca: numero; ES cantFlores: numero; ES cantEsquinas: numero)
+  variables
+    avActual: numero
+  comenzar
+    mientras ((PosAv < 100) & (cantFlores < 10) & (cantEsquinas < 15))
+      verSiHayFlor(cantFlores, cantEsquinas)
+      mover
+    si (PosAv = 100)
+      verSiHayFlor(cantFlores, cantEsquinas)
+    avActual:= PosAv  
+    deposito(avActual, ca, cantFlores)
+  fin
+  
+  proceso  agarrarFloresDeposito(ES cantFloresTotales: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFloresTotales:= cantFloresTotales + 1
+    Pos(1,5)
+    LiberarEsquina(10,10)
+  fin
+areas
+  area1: AreaP (1,3,100,3)
+  area2: AreaP (1,4,100,4)
+  posCosechador: AreaP (1,5,1,5)
+  deposito: AreaC (10,10,10,10)
+robots
+  robot robot1
+  variables
+    id: numero
+    ca, cantFlores, cantEsquinas: numero
+  comenzar
+    derecha
+    ca:= PosCa
+    cantFlores:= 0
+    cantEsquinas:= 0
+    RecibirMensaje(id, cosechador)
+    mientras (PosAv < 100)
+      recorrerCalle(ca, cantFlores, cantEsquinas)
+      EnviarMensaje(1, cosechador)  {si le envia 1 es porque deposito}
+      cantFlores:= 0 {reinicio}
+      cantEsquinas:= 0
+    EnviarMensaje(2, cosechador)  {si le envia 2 es porque termino}
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantFloresTotales, terminar: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    cantFloresTotales:= 0
+    mientras (terminar <> 2)
+      RecibirMensaje(terminar, *) {robot fue al deposito}
+      agarrarFloresDeposito(cantFloresTotales)
+    RecibirMensaje(terminar, *) {el 1Ã‚Â° robot le envia 2 y sale del mientras, el 2Ã‚Â° lo recibe afuera}
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  cosechador: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, deposito)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, deposito)
+  AsignarArea(cosechador, posCosechador)
+  AsignarArea(cosechador, deposito)
+  Iniciar(R1, 1,3)
+  Iniciar(R2, 1,4)
+  Iniciar(cosechador, 1,5)
+fin

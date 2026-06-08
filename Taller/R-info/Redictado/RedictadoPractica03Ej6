@@ -1,0 +1,206 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica03Ej6
+procesos
+  proceso juntarFlores(ES cantFlores: numero) 
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero) 
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso bloquearEsq(E av: numero; E ca: numero; ES cantFlores: numero) 
+  comenzar 
+    BloquearEsquina(av,ca) 
+    mover
+    juntarFlores(cantFlores)
+    mover
+    LiberarEsquina(av,ca)
+    {juntarFlores(cantFlores) de la 6,8}
+  fin
+  
+  proceso lineaCompleta(ES cantFlores: numero)
+  comenzar
+    repetir 6 {primer lado}
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)  {de la ultima 2,8}
+    derecha
+  fin
+  
+  proceso lineaConBloqueo(ES cantFlores: numero)
+  variables
+    av, ca: numero
+  comenzar
+    repetir 2
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+    av:= PosAv + 1
+    ca:= PosCa + 1
+    bloquearEsq(av, ca, cantFlores) 
+    repetir 2
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)  {de la ultima 8,8}
+    derecha
+  fin
+  
+  proceso recorrerCuadrante(ES cantFlores: numero)
+  comenzar
+    lineaCompleta(cantFlores)
+    repetir 2
+      lineaConBloqueo(cantFlores)
+    lineaCompleta(cantFlores)
+  fin
+  
+  proceso bloquearEsq2(E av: numero; E ca: numero; ES cantFlores: numero; ES cantPapeles: numero) 
+  comenzar 
+    BloquearEsquina(av,ca) 
+    mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    mover
+    LiberarEsquina(av,ca)
+  fin
+  
+  proceso lineaConBloqueo2(ES cantFlores: numero; ES cantPapeles: numero)
+  variables
+    av, ca: numero
+  comenzar
+    repetir 2 {para la segunda vez que lo llamo aca son 6 y abajo son 2}
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    av:= PosAv + 1
+    ca:= PosCa + 1
+    bloquearEsq2(av, ca, cantFlores, cantPapeles) 
+    repetir 6
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)  
+    juntarPapeles(cantPapeles)
+    derecha
+  fin
+  
+  proceso lineaCompleta2(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    repetir 10 {primer lado}
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    derecha
+  fin
+  
+  proceso recorrerCuadrante2(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    lineaConBloqueo2(cantFlores, cantPapeles)
+    repetir 2
+      lineaCompleta2(cantFlores, cantPapeles) 
+    lineaConBloqueo2(cantFlores, cantPapeles) {se que esta mal calculado pero x}
+  fin
+  
+  proceso recorrerCalle(ES cantFlores: numero)
+  comenzar 
+    derecha
+    mientras ((PosAv < 100) & (HayFlorEnLaBolsa))
+      depositarFlor
+      mover
+    si (HayFlorEnLaBolsa)  {llegue a la 100}
+      depositarFlor
+  fin 
+  
+  proceso recorrerCalle2(ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar 
+    derecha
+    mientras ((PosAv < 100) & (HayFlorEnLaBolsa) & (HayPapelEnLaBolsa))
+      depositarFlor
+      depositarPapel
+      mover
+    si ((HayFlorEnLaBolsa) & (HayPapelEnLaBolsa))  {llegue a la 100}
+      depositarFlor
+      depositarPapel
+  fin 
+areas  
+  area: AreaPC (2,2,15,15)
+  calle: AreaPC (1,20,100,21)
+  posFiscalizador: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    cantFlores: numero
+    calle: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerCuadrante(cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    RecibirMensaje(calle, fiscalizador)
+    Pos(1, calle)
+    recorrerCalle(cantFlores)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantFlores, cantPapeles: numero
+    calle: numero
+  comenzar
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerCuadrante2(cantFlores, cantPapeles)
+    EnviarMensaje(id, fiscalizador)
+    RecibirMensaje(calle, fiscalizador)
+    Pos(1, calle)
+    recorrerCalle2(cantFlores, cantPapeles)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+  comenzar
+    EnviarMensaje(id, R1)
+    EnviarMensaje(id, R2)
+    {si quisiera hacer que el fiscalizador espere a que terminaran todos. se guarda el id de cada uno, y cuando le llegan todos los id, ahi les envia a cada uno su calle}
+    RecibirMensaje(id, *)  {primero en terminar}
+    si (id = 1)
+      EnviarMensaje(20, R1)
+    sino
+      EnviarMensaje(20, R2)
+    RecibirMensaje(id, *)  {segundo en terminar}
+    si (id = 1)
+      EnviarMensaje(21, R2)
+    sino
+      EnviarMensaje(21, R2)
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, area) 
+  AsignarArea(R1, calle)
+  AsignarArea(R2, area)
+  AsignarArea(R2, calle)
+  AsignarArea(fiscalizador, posFiscalizador) 
+  Iniciar(R1, 2,2)
+  Iniciar(R2, 5,5)  
+  Iniciar(fiscalizador, 1,1)
+fin

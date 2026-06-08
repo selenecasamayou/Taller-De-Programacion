@@ -1,0 +1,88 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃ³digo de ejemplo que implementa un
+proceso que recibe un nÃºmero de avenida como parÃ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica01Ej3
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores (ES cantTotalF: numero)
+  variables 
+    cantF : numero
+  comenzar
+    cantF := 0
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantF:= cantF +1
+    cantTotalF := cantTotalF + cantF  
+    repetir cantF
+      depositarFlor
+  fin
+  
+  proceso juntarPapeles (ES cantTotalP: numero)
+  variables
+    cantP : numero
+  comenzar
+    cantP := 0
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantP:= cantP +1
+    cantTotalP := cantTotalP + cantP
+    repetir cantP
+      depositarPapel
+  fin
+  
+  proceso recorrerMedioEscalon (ES cantTotalP : numero; ES cantTotalF : numero)
+  comenzar
+    juntarPapeles(cantTotalP)
+    juntarFlores(cantTotalF)
+  fin
+  
+  proceso hacerEscalon (E escalon: numero; ES mayorEscalonPapeles: numero)
+  variables
+    cantTotalP, cantTotalF : numero
+  comenzar
+    cantTotalP := 0
+    cantTotalF := 0
+    repetir escalon
+      recorrerMedioEscalon(cantTotalP, cantTotalF)
+      mover
+    derecha
+    repetir escalon
+      recorrerMedioEscalon(cantTotalP, cantTotalF)
+      mover
+    izquierda
+    si ((cantTotalP > cantTotalF) & ((cantTotalP - cantTotalF) = 1))
+      mayorEscalonPapeles := mayorEscalonPapeles +1
+  fin
+areas
+  ciudad1: AreaP (12,6,32,24)
+robots
+  robot robot1
+  variables
+    escalon, mayorEscalonPapeles: numero
+  comenzar
+    escalon := 1
+    mayorEscalonPapeles := 0
+    repetir 4
+      hacerEscalon(escalon, mayorEscalonPapeles)
+      escalon := escalon + 1
+    Informar(mayorEscalonPapeles)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+comenzar
+  AsignarArea(R1, ciudad1)
+  AsignarArea(R2, ciudad1)
+  AsignarArea(R3, ciudad1)
+  Iniciar(R1, 12,14)
+  Iniciar(R2, 17,10)
+  Iniciar(R3, 22,6)
+fin

@@ -1,0 +1,188 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoParcial1
+procesos
+  proceso irBase(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12, 11)
+    Pos(12, 11)
+    depositarFlor
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12, 11)
+  fin
+  
+  proceso irFuenteF(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    Pos(10,12)  {no hace falta bloquearla porque solo accede el a la fuente}
+    tomarFlor
+    irBase(avOriginal, caOriginal)
+  fin
+  
+  proceso irBase2(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12, 11)
+    Pos(12, 11)
+    depositarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(12, 11)
+  fin
+  
+  proceso irFuenteP(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    Pos(10,10)  {no hace falta bloquearla porque solo accede el a la fuente}
+    tomarPapel
+    irBase2(avOriginal, caOriginal)
+  fin
+  
+  proceso dejarFlor(ES avActual: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    depositarFlor
+    si (avActual < 20)
+      mover
+    avActual:= PosAv
+  fin
+  
+  proceso recogerBase(ES avActual: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12, 11)
+    Pos(12, 11)
+    tomarFlor
+    Pos(avActual, 12)
+    LiberarEsquina(12, 11)
+    dejarFlor(avActual, avOriginal, caOriginal)
+  fin
+  
+  proceso dejarPapel(ES avActual: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    depositarPapel
+    si (avActual < 20)
+      mover
+      avActual:= PosAv
+  fin
+  
+  proceso recogerBase2(ES avActual: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(12, 11)
+    Pos(12, 11)
+    tomarPapel
+    Pos(avActual, 10)
+    LiberarEsquina(12, 11)
+    dejarPapel(avActual, avOriginal, caOriginal)
+  fin
+areas
+  posRec1: AreaP (11,12,11,12)
+  posRec2: AreaP (11,10,11,10)
+  posDep1: AreaP (12,12,12,12)
+  posDep2: AreaP (12,10,12,10)
+  posFiscalizador: AreaP (20,11,20,11)
+  calle1: AreaP (13,12,20,12)
+  calle2: AreaP (13,10,20,10)
+  fuenteF: AreaP (10,12,10,12)
+  fuenteP: AreaP (10,10,10,10)
+  base: AreaPC (12,11,12,11)
+robots
+  robot robot1  {recolector azul}
+  variables
+    avOriginal, caOriginal: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    seguir:= V
+    mientras (seguir)
+      irFuenteF(avOriginal, caOriginal)
+      EnviarMensaje(seguir, D1)   {para avisarle que puede ir a buscar el objeto}
+      RecibirMensaje(seguir, D1)  {para saber si va a depositar otro objeto}
+    EnviarMensaje(1, fiscalizador)  {que termino}
+  fin
+  
+  robot robot2  {recolector verde}
+  variables
+    avOriginal, caOriginal: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    seguir:= V
+    mientras (seguir)
+      irFuenteP(avOriginal, caOriginal)
+      EnviarMensaje(seguir, D2)
+      RecibirMensaje(seguir, D2)
+    EnviarMensaje(2, fiscalizador)  
+  fin
+  
+  robot robot3  {depositador azul}
+  variables 
+    avOriginal, caOriginal: numero 
+    avActual: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avActual:= 13
+    derecha
+    mientras(avActual <= 20)
+      RecibirMensaje(seguir, R1)  {para ir a buscar el objeto}
+      recogerBase(avActual, avOriginal, caOriginal)  {avanza aca}
+      si (avActual = 20)
+        seguir:= F
+        avActual:= avActual + 1 {para que corte}
+      EnviarMensaje(seguir, R1)  {para que el recolector deje un objeto en la fuente}
+  fin
+  
+  robot robot4  {depositador verde}
+  variables 
+    avOriginal, caOriginal: numero 
+    avActual: numero
+    seguir: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    avActual:= 13
+    derecha
+    mientras(avActual < 21)
+      RecibirMensaje(seguir, R2)  
+      recogerBase2(avActual, avOriginal, caOriginal)
+      si (avActual = 20)
+        seguir:= F
+        avActual:= avActual + 1 {para que corte}
+      EnviarMensaje(seguir, R2)  
+  fin
+  
+  robot robot5
+  variables
+    equipoGanador: numero
+  comenzar
+    RecibirMensaje(equipoGanador, *)
+    Informar(equipoGanador)
+    RecibirMensaje(equipoGanador, *)  {y recibe el otro para que no se quede esperando}
+  fin                                 {pero no me interesa}
+variables
+  R1: robot1  {azul}
+  R2: robot2  {verde}
+  D1: robot3  {azul}
+  D2: robot4  {verde}
+  fiscalizador: robot5
+comenzar
+  AsignarArea(R1, posRec1) 
+  AsignarArea(R1, fuenteF) 
+  AsignarArea(R1, base) 
+  AsignarArea(R2, posRec2) 
+  AsignarArea(R2, fuenteP) 
+  AsignarArea(R2, base) 
+  AsignarArea(D1, posDep1) 
+  AsignarArea(D1, calle1) 
+  AsignarArea(D1, base) 
+  AsignarArea(D2, posDep2) 
+  AsignarArea(D2, calle2) 
+  AsignarArea(D2, base) 
+  AsignarArea(fiscalizador, posFiscalizador) 
+  Iniciar(R1, 11,12)
+  Iniciar(R2, 11,10)
+  Iniciar(D1, 12,12)
+  Iniciar(D2, 12,10)
+  Iniciar(fiscalizador, 20,11)
+fin

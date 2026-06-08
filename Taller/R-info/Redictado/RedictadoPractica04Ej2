@@ -1,0 +1,101 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica04Ej2
+procesos
+  proceso juntarPapeles (E avActual: numero; E caActual: numero E cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      si (cantPapeles < 5)
+        tomarPapel
+        cantPapeles:= cantPapeles + 1
+      sino
+        BloquearEsquina(50,50)
+        Pos(50,50)
+        repetir 5
+          depositarPapel
+        Pos(avActual, caActual)
+        LiberarEsquina(50,50)
+  fin
+  
+  proceso recorrerAvenida(E avActual: numero; E caActual: numero E cantPapeles: numero)
+  comenzar 
+    mientras ((PosCa < 100) & ~(cantPapeles = 5))  {por si junta en varias esquinas}
+      juntarPapeles(avActual, caActual, cantPapeles)
+      mover 
+    juntarPapeles(avActual, caActual, cantPapeles)  
+  fin
+  
+  proceso buscarPapeles(E cantPapeles: numero; ES intentos: numero)
+  comenzar
+    mientras ((HayPapelEnLaEsquina) & (cantPapeles > 0))
+      tomarPapel
+      cantPapeles:= cantPapeles - 1
+    si ~(cantPapeles = 0)  {no habia suficientes}
+      mientras (HayPapelEnLaBolsa)  
+        depositarPapel
+      intentos:= intentos + 1
+    sino
+      intentos:= 0  {reseteo si no son seguidos}
+  fin
+  
+  proceso irEsquina(E avActual: numero; E caActual: numero; E cantPapeles: numero; ES intentos: numero)
+  comenzar 
+    BloquearEsquina(50,50) 
+    Pos(50,50) 
+    buscarPapeles(cantPapeles, intentos)
+    Pos(avActual, caActual)
+    LiberarEsquina(50,50)
+  fin
+areas
+  posProd1: AreaP (5,1,5,100)
+  posProd2: AreaP (10,1,10,100)
+  posCons1: AreaP (11,1,11,1)
+  posCons2: AreaP (12,1,12,1)
+  esquina: AreaC (50,50,50,50)
+robots
+  robot robot1
+  variables
+    avActual, caActual: numero
+    cantPapeles: numero
+  comenzar
+    cantPapeles:= 0
+    mientras ~(PosCa = 100)
+      avActual:= PosAv
+      caActual:= PosCa
+      recorrerAvenida(avActual, caActual, cantPapeles)
+  fin
+  
+  robot robot2
+  variables
+    avActual, caActual: numero
+    intentos, cantPapeles: numero
+  comenzar
+    intentos:= 0
+    avActual:= PosAv
+    caActual:= PosCa
+    mientras ~(intentos = 8)
+      Random(cantPapeles,2,5)
+      irEsquina(avActual, caActual, cantPapeles, intentos)
+  fin
+variables
+  P1: robot1
+  P2: robot1
+  C1: robot2  
+  C2: robot2
+comenzar
+  AsignarArea(P1, posProd1)
+  AsignarArea(P1, esquina) 
+  AsignarArea(P2, posProd2) 
+  AsignarArea(P2, esquina)
+  AsignarArea(C1, posCons1) 
+  AsignarArea(C1, esquina)
+  AsignarArea(C2, posCons2) 
+  AsignarArea(C2, esquina)
+  Iniciar(P1, 5,1)
+  Iniciar(P2, 10,1)
+  Iniciar(C1, 11,1)
+  Iniciar(C2, 12,1)
+fin

@@ -1,0 +1,118 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica03Ej3
+procesos
+  proceso verSiHayFlores(E av: numero; E ca: numero; ES cantFloresJuntadas: numero; ES hayFlores: boolean)
+  comenzar
+    BloquearEsquina(av,ca)
+    Pos(av, ca)
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFloresJuntadas:= cantFloresJuntadas + 1
+    sino
+      hayFlores:= F
+    
+  fin
+  
+  proceso accederEsquina(E av: numero; E ca: numero; E avOriginal: numero; E caOriginal: numero; ES cantFloresJuntadas: numero; ES hayFlores: boolean)
+  comenzar
+    mientras(hayFlores)
+      verSiHayFlores(av, ca, cantFloresJuntadas, hayFlores)
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(av, ca)
+  fin
+areas
+  pos1: AreaP (2,1,2,1)
+  pos2: AreaP (3,1,3,1)
+  pos3: AreaP (4,1,4,1)
+  pos4: AreaP (5,1,5,1)
+  posjefe: AreaP (1,1,1,1)
+  area: AreaPC (2,2,10,10)
+robots
+  robot robot1
+  variables
+    id, cantFloresJuntadas: numero
+    av, ca: numero
+    avOriginal, caOriginal: numero
+    hayFlores: boolean
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, jefe)
+    RecibirMensaje(av, jefe)
+    RecibirMensaje(ca, jefe)
+    hayFlores:= V
+    accederEsquina(av, ca, avOriginal, caOriginal, cantFloresJuntadas, hayFlores)
+    EnviarMensaje(id, jefe)
+    EnviarMensaje(cantFloresJuntadas, jefe)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    av, ca: numero
+    cantFloresJuntadas, floresMax, idMax: numero
+  comenzar
+    Random(av, 2, 10)
+    Random(ca, 2, 10)
+    {/////////////////////}
+    EnviarMensaje(1, R1)
+    EnviarMensaje(av, R1)
+    EnviarMensaje(ca, R1)
+    {/////////////////////}
+    EnviarMensaje(2, R2)
+    EnviarMensaje(av, R2)
+    EnviarMensaje(ca, R2)
+    {/////////////////////}
+    EnviarMensaje(3, R3)
+    EnviarMensaje(av, R3)
+    EnviarMensaje(ca, R3)
+    {/////////////////////}
+    EnviarMensaje(4, R4)
+    EnviarMensaje(av, R4)
+    EnviarMensaje(ca, R4)
+    {/////////////////////}
+    floresMax:= -1
+    repetir 4
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantFloresJuntadas, R1)
+      sino
+        si (id = 2)
+          RecibirMensaje(cantFloresJuntadas, R2)
+        sino
+          si (id = 3)
+            RecibirMensaje(cantFloresJuntadas, R3)
+          sino 
+            RecibirMensaje(cantFloresJuntadas, R4)
+      {////////////////////////////////}
+      si (cantFloresJuntadas > floresMax)
+        floresMax:= cantFloresJuntadas
+        idMax:= id
+    Informar(idMax) 
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  R4: robot1
+  jefe: robot2
+comenzar
+  AsignarArea(R1, pos1)
+  AsignarArea(R1, area)
+  AsignarArea(R2, pos2)
+  AsignarArea(R2, area)
+  AsignarArea(R3, pos3)
+  AsignarArea(R3, area)
+  AsignarArea(R4, pos4)
+  AsignarArea(R4, area)
+  AsignarArea(jefe, posjefe)
+  Iniciar(R1, 2,1)
+  Iniciar(R2, 3,1)
+  Iniciar(R3, 4,1)
+  Iniciar(R4, 5,1)
+  Iniciar(jefe, 1,1)
+fin

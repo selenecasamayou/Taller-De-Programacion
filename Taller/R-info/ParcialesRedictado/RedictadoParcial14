@@ -1,0 +1,117 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoParcial14
+procesos
+  proceso juntarFlor(ES cantFlores: numero)
+  comenzar
+    tomarFlor
+    cantFlores:= cantFlores + 1
+  fin
+  
+  proceso recolectar(E av: numero; E ca: numero; E avOriginal: numero; E caOriginal: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(av, ca)
+    Pos(av, ca)
+    mientras (HayFlorEnLaEsquina)
+      juntarFlor(cantFlores)
+      BloquearEsquina(5, 5)
+      Pos(5, 5)
+      LiberarEsquina(av, ca)
+      depositarFlor
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      LiberarEsquina(5, 5)
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(av, ca)
+  fin
+  
+  proceso irAJuntar(ES cantFloresTotal: numero)
+  comenzar
+    Pos(5, 5)
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFloresTotal:= cantFloresTotal + 1
+  fin
+areas
+  pos1: AreaP (1,1,1,1)
+  pos2: AreaP (2,1,2,1)
+  pos3: AreaP (3,1,3,1)
+  posFiscalizador: AreaP (5,1,5,1)
+  area: AreaPC (10,10,30,30)
+  esquina: AreaC (5,5,5,5)
+robots
+  robot robot1
+  variables
+    id: numero
+    av, ca, avOriginal, caOriginal: numero
+    intentos: numero
+    cantFlores: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    Random(intentos, 2, 5)
+    RecibirMensaje(id, fiscalizador)
+    repetir intentos
+      EnviarMensaje(id, fiscalizador)
+      RecibirMensaje(av, fiscalizador)
+      RecibirMensaje(ca, fiscalizador)
+      recolectar(av, ca, avOriginal, caOriginal, cantFlores)
+    EnviarMensaje(0, fiscalizador)  {le avisa que termino}
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    av, ca: numero
+    cantRobotsFin, cantFloresTotal: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    cantRobotsFin:= 0
+    mientras (cantRobotsFin < 3)
+      RecibirMensaje(id, *)
+      si (id = 0)
+        cantRobotsFin:= cantRobotsFin + 1  {no puedo recibir la cant de flores}
+      sino
+        Random(av, 10, 30)
+        Random(ca, 10, 30)
+        si (id = 1)
+          EnviarMensaje(av, R1)
+          EnviarMensaje(ca, R1)
+        sino
+          si (id = 2)
+            EnviarMensaje(av, R2)
+            EnviarMensaje(ca, R2)
+          sino
+            EnviarMensaje(av, R3)
+            EnviarMensaje(ca, R3)
+    cantFloresTotal:= 0
+    irAJuntar(cantFloresTotal)
+    Informar(cantFloresTotal)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, pos1)
+  AsignarArea(R1, area)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, pos2)
+  AsignarArea(R2, area)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, pos3)
+  AsignarArea(R3, area)  
+  AsignarArea(R3, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  AsignarArea(fiscalizador, esquina)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 2,1)
+  Iniciar(R3, 3,1)
+  Iniciar(fiscalizador, 5,1)
+fin

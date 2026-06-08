@@ -1,0 +1,94 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica03Ej1
+procesos
+  proceso vaciarEsquina1
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+  fin
+  
+  proceso vaciarEsquina2
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+  fin
+  
+  proceso vaciarBolsa1
+  comenzar
+    mientras (HayFlorEnLaBolsa)
+      depositarFlor
+    fin
+  
+  {deberia de preguntar si tiene papel/flor en la bolsa?}
+  
+  proceso vaciarBolsa2
+  comenzar
+    mientras (HayPapelEnLaBolsa)
+      depositarPapel
+    fin
+areas
+  area1: AreaPC (1,1,5,10)
+  area2: AreaPC (6,1,10,10)
+robots
+  robot robot1
+  variables
+   av, ca: numero
+   avOriginal, caOriginal: numero
+  comenzar
+    avOriginal: PosAv
+    caOriginal: PosCa
+    repetir 5
+      Random(av, 1, 5)
+      Random(ca, 1, 10)
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      vaciarEsquina1
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(av, ca)
+    BloquearEsquina(10, 10)
+    Pos(10, 10)
+    vaciarBolsa1
+    {hago que vuelva a su posicion original?}
+    LiberarEsquina(10, 10)
+  fin
+  
+  robot robot2
+  variables
+    av, ca: numero
+    avOriginal, caOriginal: numero
+  comenzar
+    avOriginal: PosAv
+    caOriginal: PosCa
+    repetir 3
+      Random(av, 6, 10)
+      Random(ca, 1, 10)
+      BloquearEsquina(av, ca)
+      Pos(av, ca)
+      vaciarEsquina2
+      Pos(avOriginal, caOriginal)
+      LiberarEsquina(av, ca)
+    BloquearEsquina(10, 10)
+    Pos(10, 10)
+    vaciarBolsa2
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(10, 10)
+  fin  
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot2
+  R4: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R2, area1)
+  AsignarArea(R3, area2)
+  AsignarArea(R4, area2)
+  Iniciar(R1, 6,10)
+  Iniciar(R2, 7,10)
+  Iniciar(R3, 8,10)
+  Iniciar(R4, 9,10)
+fin

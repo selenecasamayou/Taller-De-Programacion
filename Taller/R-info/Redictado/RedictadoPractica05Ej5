@@ -1,0 +1,95 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica05Ej5
+procesos
+  proceso depositarEsq(E avOriginal: numero; E caOriginal: numero; E cantP: numero)
+  comenzar
+    BloquearEsquina(100, 1)
+    Pos(100, 1)
+    repetir cantP
+      depositarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(100, 1)
+  fin
+  
+  proceso recolectarEsq(E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(100, 1)
+    Pos(100, 1)
+    tomarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(100, 1)
+  fin
+areas
+  pos1: AreaP (10,1,10,1)
+  pos2: AreaP (11,1,11,1)
+  pos3: AreaP (12,1,12,1)
+  posServidor: AreaP (13,1,13,1)
+  esq: AreaC (100,1,100,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantPapeles: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, servidor)
+    repetir 4
+      EnviarMensaje(id, servidor)  {le envia una solicitud}
+      RecibirMensaje(cantPapeles, servidor)
+      repetir cantPapeles
+        recolectarEsq(avOriginal, caOriginal)
+    EnviarMensaje(0, servidor)  {termino}
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    robotsFin, cantP: numero
+  comenzar
+    EnviarMensaje(id, R1)
+    EnviarMensaje(id, R2)    
+    EnviarMensaje(id, R3)
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    robotsFin:= 0
+    mientras (robotsFin < 3)
+      RecibirMensaje(id, *)
+      si (id = 0)
+        robotsFin:= robotsFin + 1
+      sino
+        Random(cantP, 1, 5)
+        depositarEsq(avOriginal, caOriginal, cantP)
+        si (id = 1)
+          EnviarMensaje(cantP, R1)
+        sino
+          si (id = 2)
+            EnviarMensaje(cantP, R2)
+          sino
+            EnviarMensaje(cantP, R3)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  servidor: robot2
+comenzar
+  AsignarArea(R1, pos1)
+  AsignarArea(R1, esq)
+  AsignarArea(R2, pos2)
+  AsignarArea(R2, esq)
+  AsignarArea(R3, pos3)
+  AsignarArea(R3, esq)
+  AsignarArea(servidor, posServidor)
+  AsignarArea(servidor, esq)
+  Iniciar(R1, 10,1)
+  Iniciar(R2, 11,1)  
+  Iniciar(R3, 12,1)
+  Iniciar(servidor, 13,1)
+fin

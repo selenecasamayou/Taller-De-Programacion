@@ -1,0 +1,103 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica05Ej3
+procesos
+  proceso hayFlor(ES cantFlores: numero; ES cantEsq: numero)
+  comenzar
+    si (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+    sino
+      cantEsq:= cantEsq + 1
+  fin
+  
+  proceso irDeposito(ES avActual: numero; E ca: numero; ES cantFlores: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    repetir cantFlores
+      depositarFlor
+    Pos(avActual, ca)
+    LiberarEsquina(10,10)
+  fin
+  
+  proceso recorrerCalle(E ca: numero; ES cantFlores: numero; ES cantEsq: numero)
+  variables
+    avActual: numero
+  comenzar
+    mientras ((PosAv < 100) & (cantFlores < 10) & (cantEsq < 15))
+      hayFlor(cantFlores, cantEsq)
+      mover
+    si (PosAv < 100)  {llegue a la ultima, preguntar por las dudas}
+      hayFlor(cantFlores, cantEsq)
+    avActual:= PosAv
+    irDeposito(avActual, ca, cantFlores)
+  fin
+  
+  proceso depositoFlores(ES cantFloresTotales: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFloresTotales:= cantFloresTotales + 1
+    Pos(1,5)
+    LiberarEsquina(10,10)
+  fin
+areas
+  calle1: AreaP (1,3,100,3)
+  calle2: AreaP (1,4,100,4)
+  posCos: AreaP (1,5,1,5)
+  deposito: AreaC (10,10,10,10)
+robots
+  robot robot1
+  variables
+    id: numero
+    ca: numero
+    cantFlores, cantEsq: numero
+  comenzar
+    derecha
+    ca:= PosCa
+    cantFlores:= 0
+    cantEsq:= 0
+    RecibirMensaje(id, C1)
+    mientras (PosAv < 100)
+      recorrerCalle(ca, cantFlores, cantEsq)
+      EnviarMensaje(1, C1) {ir al deposito}
+      cantFlores:= 0
+      cantEsq:= 0
+    EnviarMensaje(2, C1)  {terminar}  
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantFloresTotales: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    cantFloresTotales:= 0
+    mientras (id <> 2)  {msj para terminar}  {preguntar si seria poniendo ids = 2}
+      RecibirMensaje(id, *)      {porque los 2 deberian de terminar, o es lo mismo}
+      depositoFlores(cantFloresTotales)
+    RecibirMensaje(id, *)  {porque los 2 robots le van a mandar que terminaron}
+    Informar(cantFloresTotales)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  C1: robot2
+comenzar
+  AsignarArea(R1, calle1)
+  AsignarArea(R1, deposito)
+  AsignarArea(R2, calle2)  
+  AsignarArea(R2, deposito)
+  AsignarArea(C1, posCos)
+  AsignarArea(C1, deposito)
+  Iniciar(R1, 1,3)
+  Iniciar(R2, 1,4)
+  Iniciar(C1, 1,5)
+fin

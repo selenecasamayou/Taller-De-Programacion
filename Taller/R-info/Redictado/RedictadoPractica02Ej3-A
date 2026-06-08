@@ -1,0 +1,96 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica02Ej3A
+procesos
+  proceso juntarFlores (ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles (ES cantPapeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerPapeles(ES cantPapeles: numero)
+  comenzar
+    repetir 9
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso recorrerFlores (ES cantFlores: numero)
+  comenzar
+    repetir 9
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+  fin
+areas
+  area1: AreaP (1,1,10,1)
+  area2: AreaP (11,1,20,1)
+  area3: AreaP (1,5,10,5)
+  area4: AreaP (11,5,20,5)
+robots
+  robot robot1
+  variables
+    cantPapeles: numero
+  comenzar
+    derecha
+    cantPapeles:= 0
+    recorrerPapeles(cantPapeles)
+    EnviarMensaje(cantPapeles, A2)
+  fin
+  
+  robot robot2
+  variables
+    cantPapeles: numero
+  comenzar
+    derecha
+    RecibirMensaje(cantPapeles, A1)
+    recorrerPapeles(cantPapeles)
+    Informar(cantPapeles)
+  fin
+  
+  robot robot3
+  variables
+    cantFlores: numero
+  comenzar
+    derecha
+    cantFlores:= 0
+    recorrerFlores(cantFlores)
+    EnviarMensaje(cantFlores, B2)
+  fin
+  
+  robot robot4
+  variables
+    cantFlores: numero
+  comenzar
+    derecha
+    RecibirMensaje(cantFlores, B1)
+    recorrerFlores(cantFlores)
+    Informar(cantFlores)
+  fin  
+variables
+  A1: robot1
+  A2: robot2
+  B1: robot3
+  B2: robot4
+comenzar
+  AsignarArea(A1, area1)
+  AsignarArea(A2, area2)
+  AsignarArea(B1, area3)
+  AsignarArea(B2, area4)
+  Iniciar(A1, 1,1)
+  Iniciar(A2, 11,1)
+  Iniciar(B1, 1,5)
+  Iniciar(B2, 11,5)
+fin

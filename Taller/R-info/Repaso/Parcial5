@@ -1,0 +1,182 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial5
+procesos
+  proceso izquierda
+  comenzar
+    repetir 2
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso recorrerAv(ES cantFlores: numero)
+  comenzar
+    repetir 4
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores)
+  fin
+  
+  proceso irEsquina(ES cantFlores: numero; E avSiguiente: numero; E caSiguiente: numero)
+  comenzar
+    BloquearEsquina(6,6)
+    Pos(6,6)
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+    Pos(avSiguiente, caSiguiente)
+    LiberarEsquina(6,6)
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso recorrerAv2(ES cantPapeles: numero)
+  comenzar
+    repetir 4
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles)
+  fin
+  
+  proceso irEsquina2(ES cantPapeles: numero; E avSiguiente: numero; E caSiguiente: numero)
+  comenzar
+    BloquearEsquina(6,6)
+    Pos(6,6)
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+    Pos(avSiguiente, caSiguiente)
+    LiberarEsquina(6,6)
+  fin
+areas
+  calle01: AreaP (1,7,5,7)
+  calle1: AreaP (7,7,11,7)
+  calle02: AreaP (1,5,5,5)
+  calle2: AreaP (7,5,11,5)
+  posFiscalizador: AreaP (1,6,1,6)
+  esquina: AreaPC (6,6,6,6)
+robots
+  robot robot1
+  variables
+    id: numero
+    avSiguiente, caSiguiente: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    derecha
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerAv(cantFlores)  {recorrido de ida}
+    avSiguiente:= 7
+    caSiguiente:= 5
+    irEsquina(cantFlores, avSiguiente, caSiguiente)
+    recorrerAv(cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+    izquierda
+    recorrerAv2(cantPapeles) {recorrido de vuelta}
+    avSiguiente:= 5
+    caSiguiente:= 7
+    irEsquina2(cantPapeles, avSiguiente, caSiguiente)
+    recorrerAv2(cantPapeles)
+    {RecibirMensaje(id, fiscalizador) no anda} 
+    {esto es para que le pueda mandar las flores y no haya una mezcla de mensajes}
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    avSiguiente, caSiguiente: numero
+    cantFlores, cantPapeles: numero
+  comenzar
+    derecha
+    cantFlores:= 0
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerAv(cantFlores)  {recorrido de ida}
+    avSiguiente:= 7
+    caSiguiente:= 7
+    irEsquina(cantFlores, avSiguiente, caSiguiente)
+    recorrerAv(cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+    izquierda
+    recorrerAv2(cantPapeles) {recorrido de vuelta}
+    avSiguiente:= 5
+    caSiguiente:= 5
+    irEsquina2(cantPapeles, avSiguiente, caSiguiente)
+    recorrerAv2(cantPapeles)
+    {RecibirMensaje(id, fiscalizador) no anda} 
+    {esto es para que le pueda mandar las flores y no haya una mezcla de mensajes}
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    cantJuntada: numero
+    cantFloresR1, cantFloresR2: numero
+    cantPapelesR1, cantPapelesR2: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, R1)
+        cantFloresR1:= cantFloresR1 + cantJuntada
+      sino
+        RecibirMensaje(cantJuntada, R2)
+        cantFloresR2:= cantFloresR2 + cantJuntada
+    si (cantFloresR1 > cantFloresR2)
+      Informar(1)
+    sino
+      Informar(2)
+    {EnviarMensaje(id, R1)  hago esto para que no reciba una cant de papeles}
+    {EnviarMensaje(id, R2) no anda}
+    repetir 2
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantJuntada, R1)
+        cantPapelesR1:= cantPapelesR1 + cantJuntada
+      sino
+        RecibirMensaje(cantJuntada, R2)
+        cantPapelesR2:= cantPapelesR2 + cantJuntada    
+    si (cantPapelesR1 > cantPapelesR2)
+      Informar(1)
+    sino
+      Informar(2)  
+  fin
+variables
+  R1: robot1
+  R2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, calle01)
+  AsignarArea(R1, calle2)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, calle02)
+  AsignarArea(R2, calle1)
+  AsignarArea(R2, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 1,7)
+  Iniciar(R2, 1,5)  
+  Iniciar(fiscalizador, 1,6)
+fin

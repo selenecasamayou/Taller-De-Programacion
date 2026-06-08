@@ -1,0 +1,105 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃƒÂ³digo de ejemplo que implementa un
+proceso que recibe un nÃƒÂºmero de avenida como parÃƒÂ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica05Ej5
+procesos
+  proceso agarrarPapel(ES cantPapeles: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(100, 1)
+    Pos(100,1)
+    tomarPapel
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(100, 1)
+    cantPapeles:= cantPapeles - 1
+  fin
+  
+  proceso depositar(E cantPapeles: numero)
+  comenzar
+    repetir cantPapeles
+      depositarPapel
+      cantPapeles:= cantPapeles - 1
+  fin
+  
+  proceso bloquear(E cantPapeles: numero)
+  comenzar
+    BloquearEsquina(100,1)
+    Pos(100, 1)
+    depositar(cantPapeles)
+    Pos(13,1)
+    LiberarEsquina(100,1)
+  fin
+areas
+  posR1: AreaP (10,1,10,1)
+  posR2: AreaP (11,1,11,1)
+  posR3: AreaP (12,1,12,1)
+  posServidor: AreaP (13,1,13,1)
+  esquina: AreaC (100,1,100,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    avOriginal, caOriginal: numero
+    cantPapeles: numero
+  comenzar
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, servidor)
+    repetir 4
+      EnviarMensaje(id, servidor) 
+      RecibirMensaje(cantPapeles, servidor)
+      mientras(cantPapeles > 0)
+        agarrarPapel(cantPapeles, avOriginal, caOriginal)
+        depositarPapel
+    EnviarMensaje(V, servidor)
+  fin
+  
+  robot robot2
+  variables
+    id, intentos: numero
+    cantPedidos, cantPapeles: numero
+    termino: boolean
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    {para el mientras, podria mandar una variable V o un valor (al terminar), para ir sumenado al final del mientras con un si(valor es correcto) cantRobotsSinTerminar + 1 }
+    repetir 4  {cantidad de intentos} {SERIA MEJOR mientras(cantRobotsSinTerminar < 3)}
+      repetir 3  {cantidad de robots}
+        RecibirMensaje(id, *)
+        si (id = 1)
+          Random(cantPapeles, 1, 5)
+          bloquear(cantPapeles)
+          EnviarMensaje(cantPapeles, R1) {avanza}
+        sino 
+          si (id = 2)
+            Random(cantPapeles, 1, 5)
+            bloquear(cantPapeles)
+            EnviarMensaje(cantPapeles, R2) {avanza}
+          sino
+            Random(cantPapeles, 1, 5)
+            bloquear(cantPapeles)
+            EnviarMensaje(cantPapeles, R3) {avanza}    
+    repetir 3
+      RecibirMensaje(termino, *) {no seria necesario con un repetir}
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  servidor: robot2
+comenzar
+  AsignarArea(R1, posR1)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, posR2)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, posR3)
+  AsignarArea(R3, esquina)
+  AsignarArea(servidor, posServidor)
+  AsignarArea(servidor, esquina)
+  Iniciar(R1, 10,1)
+  Iniciar(R2, 11,1)
+  Iniciar(R3, 12,1)
+  Iniciar(servidor, 13,1)
+fin

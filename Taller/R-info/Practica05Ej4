@@ -1,0 +1,130 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa Practica05Ej4
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+
+  proceso accederEsquina(ES cantFlores: numero; E avOriginal: numero; E caOriginal: numero; E av: numero;  E calle: numero)
+  comenzar
+    BloquearEsquina(av, calle)
+    Pos(av, calle)
+    juntarFlores(cantFlores)
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(av, calle)
+  fin
+  
+  proceso depositar(ES cantFlores: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    repetir cantFlores
+      depositarFlor
+      cantFlores:= cantFlores - 1
+    Pos(avOriginal, caOriginal)
+    LiberarEsquina(10,10)
+  fin
+  
+  proceso juntarEsquina(ES cantFloresJuntadas: numero)
+  comenzar
+    BloquearEsquina(10,10)
+    Pos(10,10)
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFloresJuntadas:= cantFloresJuntadas + 1
+    Pos(4,1)
+    LiberarEsquina(10,10)
+  fin
+areas
+  posR1: AreaP (1,1,1,1)
+  posR2: AreaP (2,1,2,1)
+  posR3: AreaP (3,1,3,1)
+  posFiscalizador: AreaP (4,1,4,1)
+  area: AreaPC (40,40,60,60)
+  esquina: AreaC(10,10,10,10)
+robots
+  robot robot1
+  variables
+    id, intentos, cantFlores: numero
+    avOriginal, caOriginal: numero
+    av, calle: numero
+  comenzar
+    cantFlores:= 0
+    avOriginal:= PosAv
+    caOriginal:= PosCa
+    RecibirMensaje(id, fiscalizador)
+    RecibirMensaje(intentos, fiscalizador)
+    mientras (intentos < 8)
+      RecibirMensaje(av, fiscalizador)
+      RecibirMensaje(calle, fiscalizador)
+      accederEsquina(cantFlores, avOriginal, caOriginal, av, calle)
+      RecibirMensaje(intentos, fiscalizador)
+    depositar(cantFlores, avOriginal, caOriginal)
+    EnviarMensaje(id, fiscalizador)
+  fin
+  
+  robot robot2
+  variables  {como indico un robot aleatorio}
+    id, R, intentos: numero
+    av, calle: numero
+    cantFloresJuntadas: numero
+  comenzar
+    intentos:= 0
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    repetir 8
+      Random(R, 1, 3)
+      Random(av, 40,60)
+      Random(calle, 40,60)
+      si (R = 1)
+        EnviarMensaje(intentos, R1)
+        EnviarMensaje(av, R1)
+        EnviarMensaje(calle, R1)
+      sino
+        si (R = 2)
+          EnviarMensaje(intentos, R2)
+          EnviarMensaje(av, R2)
+          EnviarMensaje(calle, R2)
+        sino
+          EnviarMensaje(intentos, R3)
+          EnviarMensaje(av, R3)
+          EnviarMensaje(calle, R3)
+      intentos:= intentos + 1
+    EnviarMensaje(8, R1)
+    EnviarMensaje(8, R2)
+    EnviarMensaje(8, R3)
+    repetir 3
+      RecibirMensaje(id, *)
+    juntarEsquina(cantFloresJuntadas)   
+    Informar(cantFloresJuntadas)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, posR1)
+  AsignarArea(R1, area)
+  AsignarArea(R1, esquina)
+  AsignarArea(R2, posR2)
+  AsignarArea(R2, area)
+  AsignarArea(R2, esquina)
+  AsignarArea(R3, posR3)
+  AsignarArea(R3, area)
+  AsignarArea(R3, esquina)
+  AsignarArea(fiscalizador, posFiscalizador)
+  AsignarArea(fiscalizador, esquina)
+  Iniciar(R1, 1,1)
+  Iniciar(R2, 2,1)
+  Iniciar(R3, 3,1)
+  Iniciar(fiscalizador, 4,1)
+fin

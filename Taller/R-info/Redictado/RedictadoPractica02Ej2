@@ -1,0 +1,90 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica02Ej2
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin 
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin  
+  
+  proceso verificarEscalon(ES cantEscalones: numero; E cantFlores: numero; E cantPapeles: numero)
+  comenzar
+    si (cantFlores > cantPapeles)
+      cantEscalones:= cantEscalones + 1
+  fin
+  
+  proceso hacerEscalon(E alto: numero; ES cantFlores: numero; ES cantPapeles: numero; ES cantEscalones: numero)
+  comenzar
+    repetir alto
+      juntarFlores(cantFlores)
+      juntarPapeles(cantPapeles)
+      mover
+    derecha
+    juntarFlores(cantFlores)
+    juntarPapeles(cantPapeles)
+    mover
+    izquierda
+    verificarEscalon(cantEscalones, cantFlores, cantPapeles)
+  fin
+areas
+  area1: AreaP (2,1,6,21)
+  area2: AreaP (7,1,11,21)
+  area3: AreaP (12,1,16,21)
+  areaJefe: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    alto: numero
+    cantFlores, cantPapeles, cantEscalones: numero
+  comenzar
+    repetir 4
+      cantFlores:= 0
+      cantPapeles:= 0
+      Random(alto, 1, 5)
+      hacerEscalon(alto, cantFlores, cantPapeles, cantEscalones)
+    EnviarMensaje(cantEscalones, jefe)  
+  fin
+  
+  robot robot2
+  variables
+    cantEscalonesTotal, cantEscalones: numero
+  comenzar
+    cantEscalonesTotal:= 0
+    repetir 3
+      RecibirMensaje(cantEscalones, *)
+      cantEscalonesTotal:= cantEscalonesTotal+ cantEscalones
+    Informar(cantEscalonesTotal)  
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  jefe: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R2, area2)
+  AsignarArea(R3, area3)
+  AsignarArea(jefe, areaJefe)
+  Iniciar(R1, 2,1)
+  Iniciar(R2, 7,1)  
+  Iniciar(R3, 12,1)
+  Iniciar(jefe, 1,1)
+fin

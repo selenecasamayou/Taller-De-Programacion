@@ -1,0 +1,174 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un código de ejemplo que implementa un
+proceso que recibe un número de avenida como parámetro,
+se posiciona en esa avenida y la recorre.}
+
+programa RedictadoPractica05Ej1
+procesos
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras (HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso esqBloqueada(ES cantFlores: numero)
+  variables
+    av: numero
+  comenzar
+    av:= PosAv
+    BloquearEsquina(av, 98)
+    mover
+    juntarFlores(cantFlores)
+    BloquearEsquina(av, 99)
+    mover
+    LiberarEsquina(av, 98)
+    juntarFlores(cantFlores)
+    mover
+    LiberarEsquina(av, 99)
+  fin
+  
+  proceso recorrerAv(ES cantFlores: numero)
+  comenzar
+    repetir 96
+      juntarFlores(cantFlores)
+      mover
+    juntarFlores(cantFlores) {esq 97}
+    esqBloqueada(cantFlores) {esq 98 y 99}
+    juntarFlores(cantFlores) {esq 100}  
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras (HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso esqBloqueada2(ES cantPapeles: numero)
+  variables
+    ca: numero
+  comenzar
+    ca:= PosCa
+    BloquearEsquina(2, ca)
+    mover
+    juntarPapeles(cantPapeles)
+    BloquearEsquina(3, ca)
+    mover
+    LiberarEsquina(2, ca)
+    juntarPapeles(cantPapeles)
+    mover
+    LiberarEsquina(3, ca)
+  fin
+  
+  proceso recorrerCa(ES cantPapeles: numero)
+  comenzar
+    juntarPapeles(cantPapeles) {esq 1}
+    esqBloqueada2(cantPapeles) {esq 2 y 3}
+    repetir 96
+      juntarPapeles(cantPapeles)
+      mover
+    juntarPapeles(cantPapeles) {esq 100}
+  fin
+areas
+  rojo1: AreaP (2,1,2,97)
+  rojo11: AreaP (2,100,2,100)
+  rojo2: AreaP (3,1,3,97)
+  rojo22: AreaP (3,100,3,100)
+  azul1: AreaP (1,98,1,98)
+  azul11: AreaP (4,98,100,98)
+  azul2: AreaP (1,99,1,99)
+  azul22: AreaP (4,99,100,99)
+  enComun1: AreaPC (2,98,2,98)  {R1 Y A1}
+  enComun2: AreaPC (2,99,2,99)  {R1 Y A2}
+  enComun3: AreaPC (3,98,3,98)  {R2 Y A1}
+  enComun4: AreaPC (3,99,3,99)  {R2 Y A2}
+  posFiscalizador: AreaP (1,1,1,1)
+robots
+  robot robot1
+  variables
+    id: numero
+    cantFlores: numero
+  comenzar
+    cantFlores:= 0
+    RecibirMensaje(id, fiscalizador)
+    recorrerAv(cantFlores)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id: numero
+    cantPapeles: numero
+  comenzar
+    cantPapeles:= 0
+    derecha
+    RecibirMensaje(id, fiscalizador)
+    recorrerCa(cantPapeles)
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador)
+  fin
+  
+  robot robot3
+  variables
+    id: numero
+    cantObj, cantFloresTotal, cantPapelesTotal: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, A1)    
+    EnviarMensaje(4, A2)
+    cantFloresTotal:= 0
+    cantPapelesTotal:= 0
+    repetir 4
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantObj, R1)
+        cantFloresTotal:= cantFloresTotal + cantObj
+      sino
+        si (id = 2)
+          RecibirMensaje(cantObj, R2)
+          cantFloresTotal:= cantFloresTotal + cantObj
+        sino
+          si (id = 3)
+            RecibirMensaje(cantObj, A1)
+            cantPapelesTotal:= cantPapelesTotal + cantObj
+          sino
+            RecibirMensaje(cantObj, A2)
+            cantPapelesTotal:= cantPapelesTotal + cantObj
+    si (cantFloresTotal > cantPapelesTotal)
+      Informar(1)  {gana equipo rojo}
+    sino
+      Informar(2)  {gana equipo azul}
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  A1: robot2
+  A2: robot2
+  fiscalizador: robot3
+comenzar
+  AsignarArea(R1, rojo1)
+  AsignarArea(R1, rojo11)
+  AsignarArea(R1, enComun1)
+  AsignarArea(R1, enComun2)
+  AsignarArea(R2, rojo2)
+  AsignarArea(R2, rojo22)
+  AsignarArea(R2, enComun3)
+  AsignarArea(R2, enComun4)
+  AsignarArea(A1, azul1)
+  AsignarArea(A1, azul11)
+  AsignarArea(A1, enComun1)
+  AsignarArea(A1, enComun3)  {es mas facil definirlas asi que por separado}
+  AsignarArea(A2, azul2)    {aunque tienen una esq que no van a ir}
+  AsignarArea(A2, azul22)
+  AsignarArea(A2, enComun2)
+  AsignarArea(A2, enComun4)
+  AsignarArea(fiscalizador, posFiscalizador)
+  Iniciar(R1, 2,1)
+  Iniciar(R2, 3,1)
+  Iniciar(A1, 1,98)
+  Iniciar(A2, 1,99)
+  Iniciar(fiscalizador, 1,1)
+fin

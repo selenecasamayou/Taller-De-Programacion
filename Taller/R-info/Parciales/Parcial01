@@ -1,0 +1,206 @@
+{Bienvenidos al entorno CMRE.
+Lo siguiente es un cÃƒÂ³digo de ejemplo que implementa un
+proceso que recibe un nÃƒÂºmero de avenida como parÃƒÂ¡metro,
+se posiciona en esa avenida y la recorre.}
+
+programa Parcial01
+procesos
+  proceso izquierda
+  comenzar
+    repetir 3
+      derecha
+  fin
+  
+  proceso juntarFlores(ES cantFlores: numero)
+  comenzar
+    mientras(HayFlorEnLaEsquina)
+      tomarFlor
+      cantFlores:= cantFlores + 1
+  fin
+  
+  proceso juntarPapeles(ES cantPapeles: numero)
+  comenzar
+    mientras(HayPapelEnLaEsquina)
+      tomarPapel
+      cantPapeles:= cantPapeles + 1
+  fin
+  
+  proceso hacerEscalon(E tarea: numero; ES cantFlores: numero; ES cantPapeles: numero)
+  comenzar
+    si (tarea = 1)
+      repetir 4
+        juntarFlores(cantFlores)
+        mover
+      derecha
+      repetir 3
+        juntarFlores(cantFlores)
+        mover
+      izquierda
+    sino
+      repetir 4
+        juntarPapeles(cantPapeles)
+        mover
+      derecha
+      repetir 3
+        juntarPapeles(cantPapeles)
+        mover
+      izquierda
+  fin
+  
+  proceso depositarFlores(ES cantFlores: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(99,99)
+    Pos(99,99)
+    depositarFlor
+    Pos(avOriginal, caOriginal) {se que no pide explicitamente que vuelva a su lugar original, pero sino provocaria que el programa se quede bloqueado, y solo un robot pueda depositar}
+    LiberarEsquina(99,99)
+    cantFlores:= cantFlores - 1 {lo pongo aca asi el calculo lo hace con la esquina liberada, asi no se bloquea mas tiempo del necesario}
+  fin
+  
+  proceso depositarPapeles(ES cantPapeles: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    BloquearEsquina(98,98)
+    Pos(98,98)
+    depositarPapel
+    Pos(avOriginal, caOriginal) {lo mismo que en el deposito de flores}
+    LiberarEsquina(98,98)
+    cantPapeles:= cantPapeles - 1
+  fin
+  
+  proceso dejarFyP(ES cantFlores: numero; ES cantPapeles: numero; E avOriginal: numero; E caOriginal: numero)
+  comenzar
+    mientras (cantFlores > 0)
+      depositarFlores(cantFlores, avOriginal, caOriginal)
+    mientras (cantPapeles > 0)
+      depositarPapeles(cantPapeles, avOriginal, caOriginal)
+  fin
+  
+  proceso calcularCantidad(ES cantTotalFlores: numero ES cantTotalPapeles: numero; E cantFloresJuntadasXEsclavo: numero; E cantPapelesJuntadasXEsclavo: numero)
+  comenzar {porque puede haberle tocado que las 3 veces junte papeles y no flores y viceversa}
+    si (cantFloresJuntadasXEsclavo <> 0)
+      cantTotalFlores:= cantTotalFlores + cantFloresJuntadasXEsclavo
+    si (cantPapelesJuntadasXEsclavo <> 0)
+      cantTotalPapeles:= cantTotalPapeles + cantPapelesJuntadasXEsclavo
+  fin
+  
+  proceso vaciarDepositoFlores(ES cantTotalFlores: numero)
+  comenzar
+    BloquearEsquina(99,99)
+    Pos(99,99)
+    repetir cantTotalFlores
+      tomarFlor
+      cantTotalFlores:= cantTotalFlores - 1
+    Pos(1,1) 
+    LiberarEsquina(99,99)
+  fin
+  
+  proceso vaciarDepositoPapeles(ES cantTotalPapeles: numero)
+  comenzar
+    BloquearEsquina(98,98)
+    Pos(98,98)
+    repetir cantTotalPapeles
+      tomarPapel
+      cantTotalPapeles:= cantTotalPapeles - 1
+    Pos(1,1) 
+    LiberarEsquina(98,98)
+  fin
+  
+  proceso verDepositos(ES cantTotalFlores: numero; ES cantTotalPapeles: numero)
+  comenzar
+    si (cantTotalFlores < cantTotalPapeles)
+      vaciarDepositoFlores(cantTotalFlores)
+    sino
+      vaciarDepositoPapeles(cantTotalPapeles)
+  fin
+areas
+  area1: AreaP (2,1,11,13)
+  area2: AreaP (32,1,41,13)
+  area3: AreaP (62,1,71,13)
+  posFiscalizador: AreaP (1,1,1,1)
+  depositoFlores: AreaC (99,99,99,99)  
+  depositoPapeles: AreaC (98,98,98,98)
+robots
+  robot robot1
+  variables
+    id: numero
+    tarea: numero
+    cantFlores, cantPapeles: numero
+    avOriginal, caOriginal: numero
+  comenzar
+    cantFlores:= 0 
+    cantPapeles:= 0
+    RecibirMensaje(id, fiscalizador)
+    repetir 3
+      RecibirMensaje(tarea, fiscalizador)
+      hacerEscalon(tarea, cantFlores, cantPapeles)
+    avOriginal:= PosAv  {esto lo hago para que vuelva a su esquina despues de los depositos} 
+    caOriginal:= PosCa
+    EnviarMensaje(id, fiscalizador)
+    EnviarMensaje(cantFlores, fiscalizador)
+    EnviarMensaje(cantPapeles, fiscalizador) {para que sepa cuanto dejo el robot en los depositos}
+    dejarFyP(cantFlores, cantPapeles, avOriginal, caOriginal)
+    EnviarMensaje(4, fiscalizador)
+  fin
+  
+  robot robot2
+  variables
+    id, tarea: numero
+    cantFloresJuntadasXEsclavo, cantPapelesJuntadasXEsclavo: numero
+    cantTotalFlores, cantTotalPapeles: numero
+    robTerminados: numero
+  comenzar
+    EnviarMensaje(1, R1)
+    EnviarMensaje(2, R2)
+    EnviarMensaje(3, R3)
+    repetir 3  {cantidad de escalones}
+      Random(tarea, 1, 2)
+      EnviarMensaje(tarea, R1)
+      Random(tarea, 1, 2)
+      EnviarMensaje(tarea, R2)
+      Random(tarea, 1, 2)
+      EnviarMensaje(tarea, R3)
+    cantTotalFlores:= 0
+    cantTotalPapeles:= 0
+    robTerminados:= 0
+    mientras (robTerminados < 3) {cantidad de robots que le envian lo que juntaron}
+      RecibirMensaje(id, *)
+      si (id = 1)
+        RecibirMensaje(cantFloresJuntadasXEsclavo, R1)
+        RecibirMensaje(cantPapelesJuntadasXEsclavo, R1)
+      sino
+        si (id = 2)
+          RecibirMensaje(cantFloresJuntadasXEsclavo, R2)
+          RecibirMensaje(cantPapelesJuntadasXEsclavo, R2)
+        sino
+          si (id = 3)
+            RecibirMensaje(cantFloresJuntadasXEsclavo, R3)
+            RecibirMensaje(cantPapelesJuntadasXEsclavo, R3)
+          sino
+            robTerminados:= robTerminados + 1
+      {////////////////////////////////////////}
+      calcularCantidad (cantTotalFlores, cantTotalPapeles, cantFloresJuntadasXEsclavo, cantPapelesJuntadasXEsclavo)
+    verDepositos(cantTotalFlores, cantTotalPapeles)
+  fin
+variables
+  R1: robot1
+  R2: robot1
+  R3: robot1
+  fiscalizador: robot2
+comenzar
+  AsignarArea(R1, area1)
+  AsignarArea(R1, depositoFlores)
+  AsignarArea(R1, depositoPapeles)
+  AsignarArea(R2, area2)
+  AsignarArea(R2, depositoFlores)
+  AsignarArea(R2, depositoPapeles)
+  AsignarArea(R3, area3)
+  AsignarArea(R3, depositoFlores)
+  AsignarArea(R3, depositoPapeles)
+  AsignarArea(fiscalizador, posFiscalizador)
+  AsignarArea(fiscalizador, depositoFlores)
+  AsignarArea(fiscalizador, depositoPapeles)
+  Iniciar(R1, 2,1)
+  Iniciar(R2, 32,1)
+  Iniciar(R3, 62,1)
+  Iniciar(fiscalizador, 1,1)
+fin
